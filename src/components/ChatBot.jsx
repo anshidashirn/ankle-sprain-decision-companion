@@ -45,6 +45,16 @@ const ChatBot = () => {
                 setCurrentStep('swelling');
             } else if (currentStep === 'swelling') {
                 newProfile.swelling = value;
+                setInjuryProfile(newProfile);
+                addMessage('bot', "How many days ago did the injury happen?");
+                setCurrentStep('days');
+            } else if (currentStep === 'days') {
+                newProfile.daysSinceInjury = value;
+                setInjuryProfile(newProfile);
+                addMessage('bot', "What is your primary symptom currently?");
+                setCurrentStep('symptom');
+            } else if (currentStep === 'symptom') {
+                newProfile.primarySymptom = value;
 
                 let grade = '1';
                 if (!newProfile.weightBearing && newProfile.swelling) {
@@ -54,15 +64,15 @@ const ChatBot = () => {
                 }
 
                 const finalDetails = {
-                    leg: newProfile.leg,
-                    position: newProfile.position,
+                    ...newProfile,
                     grade: grade
                 };
 
                 const evaluated = evaluateOptions(REHAB_DEFAULTS.options, REHAB_DEFAULTS.criteria, finalDetails);
                 const top3 = evaluated.slice(0, 3);
 
-                addMessage('bot', `Assessment complete. You have a Grade ${grade} sprain. I've ranked the Top 3 recovery paths for you below:`);
+                addMessage('bot', `Assessment complete. You have a Grade ${grade} sprain. Based on your symptoms, you are in Phase ${top3[0].phase} of recovery.`);
+                addMessage('bot', "I've ranked the Top 3 recovery paths and specific exercises for you below:");
                 setResults(top3);
                 setCurrentStep('completed');
             }
@@ -95,6 +105,24 @@ const ChatBot = () => {
                 </div>
             );
         }
+        if (currentStep === 'days') {
+            return (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '1rem' }}>
+                    <button onClick={() => handleChoice('0-3 Days', 2)} className="btn-primary" style={{ padding: '0.5rem 1rem' }}>Recently (0-3d)</button>
+                    <button onClick={() => handleChoice('4-14 Days', 7)} className="btn-primary" style={{ padding: '0.5rem 1rem' }}>A week or so (4-14d)</button>
+                    <button onClick={() => handleChoice('2+ Weeks', 20)} className="btn-primary" style={{ padding: '0.5rem 1rem' }}>Over 2 weeks</button>
+                </div>
+            );
+        }
+        if (currentStep === 'symptom') {
+            return (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '1rem' }}>
+                    <button onClick={() => handleChoice('Constant Pain/Swelling', 'pain')} className="btn-primary" style={{ padding: '0.5rem 1rem', textAlign: 'left' }}>🔴 Constant Pain or Swelling</button>
+                    <button onClick={() => handleChoice('Mostly Stiff or Weak', 'stiff')} className="btn-primary" style={{ padding: '0.5rem 1rem', textAlign: 'left' }}>🟡 Mostly Stiff or Weak</button>
+                    <button onClick={() => handleChoice('Ready for activity', 'ready')} className="btn-primary" style={{ padding: '0.5rem 1rem', textAlign: 'left' }}>🟢 Feeling strong, almost ready</button>
+                </div>
+            );
+        }
         if (currentStep === 'completed') {
             return (
                 <button onClick={() => window.location.reload()} className="btn-primary" style={{ marginTop: '1rem', background: 'var(--glass)' }}>
@@ -105,10 +133,16 @@ const ChatBot = () => {
         return null;
     };
 
+    const getPhaseLabel = (p) => {
+        if (p === 1) return 'PHASE 1: ACUTE (Protect)';
+        if (p === 2) return 'PHASE 2: REPAIR (Strengthen)';
+        return 'PHASE 3: REMODELING (Return)';
+    };
+
     return (
         <div style={{ maxWidth: '800px', margin: '0 auto', width: '100%' }}>
             <div className="glass-card" style={{
-                height: results ? 'auto' : '500px',
+                height: results ? 'auto' : '550px',
                 display: 'flex',
                 flexDirection: 'column',
                 padding: '2rem',
@@ -140,14 +174,26 @@ const ChatBot = () => {
 
                     {results && (
                         <div className="animate-fade-in" style={{ marginTop: '2rem' }}>
+                            <div style={{
+                                background: 'var(--primary)',
+                                color: 'white',
+                                padding: '0.5rem 1rem',
+                                borderRadius: '8px',
+                                marginBottom: '2rem',
+                                fontWeight: 'bold',
+                                textAlign: 'center'
+                            }}>
+                                {getPhaseLabel(results[0].phase)}
+                            </div>
+
                             <h2 style={{ color: 'var(--primary)', marginBottom: '1.5rem', fontSize: '1.5rem' }}>🎯 Recommended Rehab Priority</h2>
                             {results.map((res, index) => (
                                 <div key={res.id} style={{
                                     background: 'rgba(255,107,0,0.05)',
                                     border: `1px solid ${index === 0 ? 'var(--primary)' : 'var(--glass-border)'}`,
                                     borderRadius: '12px',
-                                    padding: '1.2rem',
-                                    marginBottom: '1.5rem',
+                                    padding: '1.5rem',
+                                    marginBottom: '2rem',
                                     position: 'relative'
                                 }}>
                                     <div style={{
@@ -164,11 +210,36 @@ const ChatBot = () => {
                                         RANK {index + 1}
                                     </div>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <h3 style={{ fontSize: '1.2rem' }}>{res.name}</h3>
-                                        <span style={{ color: 'var(--primary)', fontWeight: '700' }}>{res.score}/10</span>
+                                        <h3 style={{ fontSize: '1.4rem' }}>{res.name}</h3>
+                                        <span style={{ color: 'var(--primary)', fontWeight: '700', fontSize: '1.2rem' }}>{res.score}/10</span>
                                     </div>
-                                    <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem', margin: '0.5rem 0' }}>{res.description}</p>
-                                    <div style={{ fontSize: '0.85rem', color: 'var(--text)', fontStyle: 'italic', marginTop: '0.5rem' }}>
+                                    <p style={{ color: 'var(--text-dim)', fontSize: '0.95rem', margin: '0.8rem 0' }}>{res.description}</p>
+
+                                    <div style={{ marginTop: '1.5rem' }}>
+                                        <h4 style={{ fontSize: '0.9rem', color: 'var(--primary)', marginBottom: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                                            🏃 Recommended Exercises
+                                        </h4>
+                                        <div style={{ display: 'grid', gap: '0.8rem' }}>
+                                            {res.exercises.map(ex => (
+                                                <div key={ex.name} style={{
+                                                    background: 'rgba(255,255,255,0.03)',
+                                                    padding: '0.8rem',
+                                                    borderRadius: '8px',
+                                                    border: '1px solid rgba(255,255,255,0.05)'
+                                                }}>
+                                                    <div style={{ fontWeight: '600', fontSize: '0.95rem' }}>{ex.name}</div>
+                                                    <div style={{ fontSize: '0.85rem', color: 'var(--text-dim)' }}>{ex.description}</div>
+                                                </div>
+                                            ))}
+                                            {res.exercises.length === 0 && (
+                                                <div style={{ fontSize: '0.85rem', color: 'var(--text-dim)', fontStyle: 'italic' }}>
+                                                    Consult your clinician for stage-specific exercises for this path.
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div style={{ fontSize: '0.9rem', color: 'var(--text)', fontStyle: 'italic', marginTop: '1.2rem', padding: '0.8rem', background: 'rgba(255,107,0,0.1)', borderRadius: '8px' }}>
                                         💡 {res.advice}
                                     </div>
                                 </div>
