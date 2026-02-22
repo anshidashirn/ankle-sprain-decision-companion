@@ -85,34 +85,13 @@ button {
 }
 
 .btn-primary:hover {
-  background: #ff8533;
-  transform: scale(1.02);
-  box-shadow: 0 6px 20px rgba(255, 107, 0, 0.6);
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px var(--primary-glow);
 }
 
-input,
-select,
-textarea {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--glass-border);
-  border-radius: 8px;
-  padding: 0.75rem;
-  color: white;
-  width: 100%;
-  margin-bottom: 1rem;
-  font-family: inherit;
-}
-
-select option {
-  background: var(--surface);
-  color: white;
-}
-
-input:focus,
-select:focus {
-  outline: none;
-  border-color: var(--primary);
-  background: rgba(255, 255, 255, 0.08);
+.btn-primary:active {
+  transform: translateY(0);
 }
 
 .badge {
@@ -146,5 +125,31 @@ select:focus {
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.5s ease-out forwards;
+  animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--glass-border);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* Specific component tweaks */
+.matrix-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.matrix-card:hover {
+  transform: scale(1.01);
 }
