@@ -1,39 +1,29 @@
-# Ankle Sprain Rehabilitation Decision Companion
+# Decision Companion AI
 
-## Problem Understanding
-This project implements a structured decision-support system that helps users evaluate rehabilitation strategies for ankle sprains. Recovery paths vary significantly based on personal conditions and priorities, creating a multi-criteria decision problem.
+An intelligent multi-criteria decision analysis tool that uses simulated AI logic to handle any decision goal.
 
-The goal is not to provide medical advice, but to help structure recovery-related trade-offs like cost vs. speed and pain management vs. risk.
+## Features
 
-## Core Features
-### 🦶 Multi-Criteria Assessment
-The system evaluates options based on 5 critical dimensions:
-- **Pain Management**
-- **Mobility Improvement**
-- **Cost Efficiency**
-- **Recovery Speed**
-- **Risk Control**
+- **Situational AI Analysis**: Describe your case (e.g., "Moving to a new city"), and the AI identifies specific scenarios relevant to you.
+- **Scenario Impact Weighting**: Options are scored based on how well they handle each confirmed situation.
+- **Dynamic Case Modeling**: Interactive questions help model your specific requirements in real-time.
+- **Explainable Fit Score**: Transparent breakdown of how each option matches your situational profile.
 
-### 🧠 Dynamic Weighted Scoring
-- **Personalized Weights**: Criteria weights adjust automatically based on user priorities (Urgency, Budget, Risk Tolerance).
-- **Safety Constraints**: Aggressive rehab paths are penalized if the user reports high pain or is in an early acute stage.
-- **Explainable Reasoning**: Detailed explanations for why a specific path is recommended.
+## How it Works
 
-### ✨ Premium Experience
-- Modern Dark UI with Glassmorphism.
-- Interactive Decision Comparison Matrix.
-- Phase-specific exercise recommendations.
+1. **Describe Your Case**: Input your goal or current decision problem.
+2. **AI Scenario Discovery**: The system brainstorms key "Situations" and "Options".
+3. **Relevance Rating**: You rate how much each scenario applies to your specific case.
+4. **Calculated Case Fit**: The engine calculates an optimal match using weighted situational impact.
 
-## Design Philosophy
-- **Deterministic Logic**: Every decision is traceable and mathematical (Weighted Sum Model).
-- **Transparency**: Clear score breakdowns for every ranked option.
-- **Explainability**: No "black-box" AI — reasoning is generated based on score contributions.
+## Technical Stack
 
-## How It Works
-1. **Inputs**: User provides condition details (Pain, Swelling, Mobility) and priorities.
-2. **Dynamic Weighting**: Weights are adjusted (e.g., High Urgency increases Recovery Speed weight by 40%).
-3. **Scoring**: Final Score = Σ (Criterion Score × Adjusted Weight) - Constraints.
-4. **Ranking**: Results are sorted and displayed in a comparison matrix.
+- **Frontend**: React (Vite)
+- **Logic**: Weighted Scoring Engine (MCDA)
+- **Service**: Simulated LLM for dynamic criteria generation
 
-## Disclaimer
-This system is not a medical diagnostic or treatment tool. It is a structured decision-support framework intended to help users understand trade-offs in their recovery journey.
+## Getting Started
+
+1. Install dependencies: `npm install`
+2. Start the dev server: `npm run dev`
+3. Open your browser to `http://localhost:5173`
