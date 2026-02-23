@@ -37,25 +37,10 @@ export const evaluateOptions = (options, situations, userAnswers) => {
         // Normalize and generate reasoning
         const finalScore = Math.max(0, Math.min(10, rawScore)).toFixed(2);
 
-        // Find factors where this option excels (Score > 7) and user cares (Relevance > 5)
-        const strengthFactors = breakdown
-            .filter(b => b.score >= 7 && b.relevance >= 4)
-            .sort((a, b) => (b.score * b.relevance) - (a.score * a.relevance))
-            .slice(0, 3);
-
-        let justification = "";
-        if (strengthFactors.length > 0) {
-            const factorNames = strengthFactors.map(f => f.name.replace('...', '')).join(', ');
-            justification = `You should choose this because it perfectly matches your high-priority needs: ${factorNames}. In your specific case, this option offers the most reliable path to success for these factors.`;
-        } else {
-            justification = `This is your best choice because it provides the most balanced performance across all the situational factors you identified as important.`;
-        }
-
         return {
             ...option,
             score: finalScore,
             breakdown,
-            justification,
             warnings: []
         };
     });

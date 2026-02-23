@@ -65,7 +65,7 @@ const ChatBot = () => {
         if (index < situations.length) {
             setCurrentStep('questions');
             setSituationIndex(index);
-            addMessage('bot', `FACTOR: ${situations[index].label}\n\n${situations[index].question}`);
+            addMessage('bot', situations[index].question);
         } else {
             finalizeDecision();
         }
@@ -239,11 +239,6 @@ const ChatBot = () => {
                                             </div>
                                         </div>
 
-                                        <div style={{ margin: '1.5rem 0', padding: '1.2rem', background: 'rgba(255,107,0,0.05)', borderRadius: '12px', borderLeft: '4px solid var(--primary)' }}>
-                                            <p style={{ fontSize: '1rem', color: 'white', margin: 0, fontStyle: 'italic', fontWeight: '500' }}>
-                                                {res.justification}
-                                            </p>
-                                        </div>
 
                                         <div style={{ marginTop: '2rem' }}>
                                             <h4 style={{ fontSize: '0.8rem', color: 'var(--primary)', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '2px' }}>
