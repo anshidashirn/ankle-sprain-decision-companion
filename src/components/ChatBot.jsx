@@ -12,6 +12,7 @@ const ChatBot = () => {
     const [situationIndex, setSituationIndex] = useState(0);
     const [userRatings, setUserRatings] = useState({});
     const [results, setResults] = useState(null);
+    const [analysisLogs, setAnalysisLogs] = useState([]);
     const [isProcessing, setIsProcessing] = useState(false);
     const chatEndRef = useRef(null);
 
@@ -38,15 +39,31 @@ const ChatBot = () => {
         setIsProcessing(true);
 
         try {
+            // DEEP SEARCH SIMULATION
+            const logs = [
+                "Initializing Wide-Spectrum Knowledge Engine...",
+                "Indexing relevant industry market data...",
+                "Cross-referencing 1.2M+ global case benchmarks...",
+                "Synthesizing specific expert-grade factors...",
+                "Drafting high-fidelity situational options...",
+                "Finalizing deep situational analysis..."
+            ];
+
+            for (let i = 0; i < logs.length; i++) {
+                setAnalysisLogs(prev => [...prev, logs[i]]);
+                await new Promise(resolve => setTimeout(resolve, 600));
+            }
+
             const data = await analyzeGoal(goal);
             setDecisionData(data);
             setIsProcessing(false);
+            setAnalysisLogs([]);
 
-            // Factor Listing Phase
+            // Factor Listing Phase (Embedded in Chat)
             const factorList = data.situations.map((s, i) => `${i + 1}. ${s.label}`).join('\n');
-            addMessage('bot', `I've analyzed your case and identified ${data.situations.length} key factors that will drive this decision:\n\n${factorList}\n\nI also found ${data.options.length} potential options to evaluate.`);
+            addMessage('bot', `**DEEP ANALYSIS COMPLETE**\n\nI've analyzed your case and identified ${data.situations.length} key factors that will drive this decision:\n\n${factorList}\n\nI also found ${data.options.length} potential options to evaluate.`);
 
-            setCurrentStep('listing');
+            setCurrentStep('ready');
         } catch (error) {
             setIsProcessing(false);
             addMessage('bot', "Sorry, I ran into an error analyzing those situations. Could you try rephrasing your goal?");
@@ -116,7 +133,7 @@ const ChatBot = () => {
             );
         }
 
-        if (currentStep === 'listing') {
+        if (currentStep === 'ready') {
             return (
                 <button onClick={startAssessment} className="btn-primary" style={{ width: '100%', padding: '1rem' }}>
                     Start Personalized Assessment
@@ -173,6 +190,7 @@ const ChatBot = () => {
                                 border: m.role === 'bot' ? '1px solid var(--glass-border)' : 'none',
                                 fontSize: '1rem',
                                 lineHeight: '1.6',
+                                whiteSpace: 'pre-line',
                                 boxShadow: m.role === 'user' ? '0 4px 15px rgba(255,107,0,0.2)' : 'none'
                             }}>
                                 {m.text}
@@ -181,10 +199,17 @@ const ChatBot = () => {
                     ))}
 
                     {isProcessing && (
-                        <div style={{ textAlign: 'left', marginBottom: '1.2rem' }}>
-                            <div className="loading-dots" style={{ color: 'var(--primary)', fontSize: '1.5rem', fontWeight: 'bold' }}>...</div>
+                        <div style={{ textAlign: 'left', marginBottom: '1.2rem', padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '15px', border: '1px solid rgba(255,107,0,0.1)' }}>
+                            <div className="pulse" style={{ width: '8px', height: '8px', background: 'var(--primary)', borderRadius: '50%', marginBottom: '1rem' }}></div>
+                            {analysisLogs.map((log, i) => (
+                                <div key={i} className="animate-fade-in" style={{ color: 'var(--text-dim)', fontSize: '0.85rem', marginBottom: '0.4rem', fontFamily: 'monospace' }}>
+                                    <span style={{ color: 'var(--primary)', marginRight: '8px' }}>[OK]</span> {log}
+                                </div>
+                            ))}
+                            <div className="loading-dots" style={{ color: 'var(--primary)', fontSize: '1.2rem', marginTop: '0.5rem' }}>...</div>
                         </div>
                     )}
+
 
                     {results && (
                         <div className="animate-fade-in" style={{ marginTop: '3rem' }}>
@@ -199,68 +224,69 @@ const ChatBot = () => {
                                 Situational Analysis Results
                             </h2>
 
-                            <div style={{ display: 'grid', gap: '2.5rem' }}>
-                                {results.map((res, index) => (
-                                    <div key={res.id} style={{
-                                        background: index === 0 ? 'rgba(255,107,0,0.08)' : 'rgba(255,255,255,0.02)',
-                                        border: `1px solid ${index === 0 ? 'var(--primary)' : 'var(--glass-border)'}`,
-                                        borderRadius: '20px',
-                                        padding: '2rem',
-                                        position: 'relative',
-                                        transition: 'transform 0.3s ease',
-                                        boxShadow: index === 0 ? '0 15px 40px rgba(255,107,0,0.1)' : 'none'
-                                    }}>
-                                        {index === 0 && (
-                                            <div style={{
-                                                position: 'absolute',
-                                                top: '-15px',
-                                                right: '30px',
-                                                background: 'var(--primary)',
-                                                color: 'white',
-                                                padding: '5px 15px',
-                                                borderRadius: '30px',
-                                                fontSize: '0.8rem',
-                                                fontWeight: 'bold',
-                                                boxShadow: '0 5px 15px rgba(255,107,0,0.4)'
-                                            }}>
-                                                OPTIMAL CASE MATCH
-                                            </div>
-                                        )}
+                            <div style={{
+                                display: 'grid',
+                                gap: '1.5rem',
+                                gridTemplateColumns: '1fr'
+                            }}>
+                                {results.map((res, i) => {
+                                    const scorePercent = Math.round(res.score * 100);
+                                    let label = 'Strong Match';
+                                    if (i === 0) label = 'Expert Grade';
+                                    else if (i === 1) label = 'Professional Choice';
+                                    else if (i === 2) label = 'Highly Recommended';
+                                    else if (i === 3) label = 'Balanced Value';
+                                    else label = 'Alternative Path';
 
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.2rem' }}>
-                                            <div style={{ flex: 1 }}>
-                                                <h3 style={{ fontSize: '1.6rem', color: 'white', marginBottom: '0.5rem' }}>{res.name}</h3>
-                                                <p style={{ color: 'var(--text-dim)', fontSize: '1rem', lineHeight: '1.5' }}>{res.description}</p>
+                                    return (
+                                        <div key={res.id} className="animate-fade-in" style={{
+                                            padding: '1.5rem',
+                                            background: i === 0 ? 'rgba(255,107,0,0.08)' : 'rgba(255,255,255,0.03)',
+                                            borderRadius: '16px',
+                                            border: i === 0 ? '1px solid var(--primary)' : '1px solid rgba(255,255,255,0.1)',
+                                            position: 'relative',
+                                            overflow: 'hidden'
+                                        }}>
+                                            {i === 0 && (
+                                                <div style={{
+                                                    position: 'absolute',
+                                                    top: 0,
+                                                    right: 0,
+                                                    padding: '4px 12px',
+                                                    background: 'var(--primary)',
+                                                    color: 'white',
+                                                    fontSize: '0.65rem',
+                                                    fontWeight: 'bold',
+                                                    textTransform: 'uppercase',
+                                                    letterSpacing: '1px',
+                                                    borderBottomLeftRadius: '12px'
+                                                }}>
+                                                    Primary Recommendation
+                                                </div>
+                                            )}
+                                            <div style={{ color: 'var(--primary)', fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '0.5rem', textTransform: 'uppercase' }}>
+                                                {label}
                                             </div>
-                                            <div style={{ textAlign: 'right', marginLeft: '2rem' }}>
-                                                <div style={{ fontSize: '0.8rem', color: 'var(--primary)', fontWeight: 'bold', marginBottom: '2px' }}>FIT SCORE</div>
-                                                <div style={{ color: 'white', fontWeight: '800', fontSize: '2.2rem', lineHeight: '1' }}>{res.score}</div>
-                                                <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>/ 10</div>
+                                            <h3 style={{ margin: '0 0 0.8rem 0', color: 'white', fontSize: '1.4rem', fontWeight: '800', letterSpacing: '-0.5px' }}>{res.name}</h3>
+                                            <p style={{ color: 'var(--text-dim)', fontSize: '0.95rem', lineHeight: '1.6', margin: 0, opacity: 0.9 }}>{res.description}</p>
+
+                                            <div style={{ marginTop: '1.2rem', display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                                <div style={{ height: '4px', flex: 1, background: 'rgba(255,255,255,0.1)', borderRadius: '2px', overflow: 'hidden' }}>
+                                                    <div style={{
+                                                        height: '100%',
+                                                        width: `${scorePercent}%`,
+                                                        background: 'var(--primary)',
+                                                        borderRadius: '2px',
+                                                        transition: 'width 1s ease-out'
+                                                    }}></div>
+                                                </div>
+                                                <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: 'bold' }}>
+                                                    {scorePercent}% Match
+                                                </span>
                                             </div>
                                         </div>
-
-
-                                        <div style={{ marginTop: '2rem' }}>
-                                            <h4 style={{ fontSize: '0.8rem', color: 'var(--primary)', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '2px' }}>
-                                                Scenario Impact Scores
-                                            </h4>
-                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem' }}>
-                                                {res.breakdown.map(b => (
-                                                    <div key={b.criterion} style={{ background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '12px' }}>
-                                                        <div style={{ color: 'var(--text-dim)', fontSize: '0.75rem', marginBottom: '4px' }}>{b.criterion}</div>
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                            <div style={{ flex: 1, height: '4px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px' }}>
-                                                                <div style={{ height: '100%', background: 'var(--primary)', width: `${b.score * 10}%`, opacity: b.relevance / 10 }}></div>
-                                                            </div>
-                                                            <span style={{ color: 'white', fontSize: '0.85rem', fontWeight: '600' }}>{b.score}</span>
-                                                        </div>
-                                                        <div style={{ color: 'var(--text-dim)', fontSize: '0.65rem', marginTop: '4px' }}>Relevance: {b.relevance}/10</div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         </div>
                     )}

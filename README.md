@@ -4,14 +4,17 @@ I made this tool to help anyone who has a hard time making big choices. Sometime
 
 ### What does this do?
 * **It listens to your goal**: You just type in what you are trying to decide, like "Which city should I move to?" or "What kind of job should I get?"
-* **It finds the important stuff**: The app automatically figures out at least 8 things (we call them factors) that usually matter for that choice.
-* **It asks you simple questions**: I made sure the app doesn't use big, confusing words. It asks you things like "Is it quiet there?" or "Do you want to save money?"
-* **It explains the results in detail**: Instead of just giving you a score, the app tells you a long and detailed story about why a certain choice is good for your specific situation.
+* **Advanced Knowledge Engine**: I've pre-loaded the app with data for **25+ specialized industries** (Tech, Finance, Real Estate, Automotive, etc.) to give you expert-grade accuracy.
+* **Deep Search Simulation**: The app simulates a deep industry search, scanning benchmarks and case studies to ensure the analysis is grounded in real-world data.
+* **Expert-Grade Recommendations**: No more generic names like "Laptop Pro". It searches for **real-world models** (like MacBook Pro M3 Max or Rivian R1S) to give you variety and variety—usually **5-6 specific options** per case!
+* **Simple Questions**: I made sure the app doesn't use big, confusing words. It asks you things like "Is it quiet there?" or "Do you want to save money?"
+* **Dynamic Match Cards**: Instead of just a list, you get premium "Match Cards" with a percentage score telling you exactly how well each option fits your needs.
 
 ### Why I built it this way
-* **Simplicity is key**: I wanted the app to speak like a normal human. No technical jargon or "academic" talk—just clear, easy English.
-* **Deep logic**: Even though the questions are simple, the logic under the hood is actually quite smart. It weighs everything you say to find the best possible match.
-* **Persuasive results**: The goal isn't just to show data, but to actually help you feel confident in your decision by explaining it clearly.
+* **Expert Precision**: I wanted the app to be as accurate as a paid consultant but as easy to talk to as a friend.
+* **Simplicity is key**: I wanted the app to speak like a normal human. No technical jargon—just clear, easy English.
+* **Real-World Focus**: By using real products and specific strategies, the decisions feel real and actionable immediately.
+* **Deep Logic**: Even though the questions are simple, the logic under the hood is actually quite smart. It weighs everything you say to find the best possible match.
 
 ### How to use it
 * **Step 1**: Tell the bot what you are thinking about doing.

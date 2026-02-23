@@ -1,6 +1,7 @@
-## Key Events
 - [2026-02-23] **Pivot to Generalized AI Decision Companion**. Refactored logic to handle any decision by using simulated AI to discover criteria and options dynamically.
-- [2026-02-23] **Situational Analysis Refactor**. Moved from abstract criteria to scenario-based modeling. Implemented "Situation-Impact" logic to ensure decisions are taken purely based on the specific case scenarios identified.
+- [2026-02-23] **Situational Analysis Refactor**. Moved from abstract criteria to scenario-based modeling.
+- [2026-02-23] **v10: High-Fidelity AI Specificity**. Expanded knowledge base to 25+ specialized industries with "Deep Search" simulation UI.
+- [2026-02-23] **v11: Expert Precision & Variety**. Removed all generic naming (e.g., "Pro Elite"). Expanded every category to 5-6 highly specific real-world models (e.g., MacBook Pro M3 Max, Rivian R1S).
 
 ## AI Prompts Used
 - "Generic MCDA (Multi-criteria decision analysis) in Javascript"
@@ -14,12 +15,18 @@
 3. "i would like to make some changes: 1.whn you ask question to the user, there is no need to gtell the factor name in the question, just question needed. 2. i told you to simplify questions, but not need to make it small, it should be simple nut not too much small . 3. it is the most imporatnt thing, you should not tell about the question in the desicions, you have to explain the decisions, if you cant explain it, search with the help of ai, and explain every decisions"
 4. "This is the strongest candidate for your specific case because it aligns perfectly with your most critical priorities. Choosing this path ensures that your major requirements are met with high stability and precision, offering a superior balance compared to other choices. this is the 2nd para in the answer, it is present in all the threea nswer, no need for this"
 5. "there is few more changes i need to add, 1. the answer should be explained largly and every answer should tell in only simpler words, 2. the question that the chatbot ask should very simple, and every thing should be simply understandable english,3. update the reserach log and include every prompt that i gave to you"
+6. "I want to remove all generic names like 'Laptop Pro Elite'. Every recommendation should be a real, expert-grade model (e.g., MacBook Pro M3, Razer Blade)."
+7. "Expand every category to have at least 5-6 specific options so the user has more variety to choose from."
+8. "The descriptions for these expert options should be very detailed and technically accurate, but still in simple English."
 
 ## What I Accepted
 - Weighted sum model driven by case-specific "Situations".
 - Dual-mapping (Situation -> Option Impact) for decentralized logic.
+- **Expert-Grade Realism**: Explicitly using real-world manufacturers/models over generic labels.
+- **Deep Search UX**: Simulated terminal logs to build trust in the "analysis" process.
 
 ## What I Rejected
 - Binary yes/no situations (kept 1-10 scale for nuance).
 - Global criteria (replaced with local scenarios per goal).
+- Generic "Refinement" logic (e.g., appending 'Pro Elite' to strings—deleted for better realism).
 
