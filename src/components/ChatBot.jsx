@@ -6,8 +6,9 @@ const ChatBot = () => {
     const [messages, setMessages] = useState([
         { role: 'bot', text: "Hello! I'm your AI Situational Companion. Tell me, what's a major decision or case you're analyzing? (e.g., 'Moving to a new city', 'Choosing a career path')" }
     ]);
-    const [currentStep, setCurrentStep] = useState('goal'); // 'goal', 'analyzing', 'listing', 'questions', 'completed'
+    const [currentStep, setCurrentStep] = useState('goal'); // 'goal', 'factor', 'analyzing', 'listing', 'questions', 'completed'
     const [userInput, setUserInput] = useState('');
+    const [userFactors, setUserFactors] = useState([]);
     const [decisionData, setDecisionData] = useState({ situations: [], options: [] });
     const [situationIndex, setSituationIndex] = useState(0);
     const [userRatings, setUserRatings] = useState({});
@@ -35,6 +36,18 @@ const ChatBot = () => {
         const goal = userInput;
         addMessage('user', goal);
         setUserInput('');
+        setCurrentStep('factor');
+        addMessage('bot', "What is a key factor or criterion for you in this decision? (e.g., 'Budget', 'Durability', 'Brand Prestige')");
+    };
+
+    const handleFactorSubmit = async (e) => {
+        e.preventDefault();
+        if (!userInput.trim()) return;
+
+        const factors = userInput.split(',').map(f => f.trim()).filter(f => f !== '');
+        setUserFactors(factors);
+        addMessage('user', userInput);
+        setUserInput('');
         setCurrentStep('analyzing');
         setIsProcessing(true);
 
@@ -54,14 +67,32 @@ const ChatBot = () => {
                 await new Promise(resolve => setTimeout(resolve, 600));
             }
 
-            const data = await analyzeGoal(goal);
-            setDecisionData(data);
+            const data = await analyzeGoal(messages.find(m => m.role === 'user')?.text || '');
+
+            // Integrate user factors
+            const customSituations = factors.map((f, i) => ({
+                id: `user_custom_${i}`,
+                label: `Your Priority: ${f}`,
+                question: `How important is "${f}" to this specific decision?`,
+                weights: {}
+            }));
+
+            // Assign custom factor weights (neutral biased towards top options)
+            customSituations.forEach(sit => {
+                data.options.forEach((opt, idx) => {
+                    sit.weights[opt.id] = 8 - idx; // Slight bias to top options
+                });
+            });
+
+            const mergedSituations = [...customSituations, ...data.situations];
+            setDecisionData({ ...data, situations: mergedSituations });
+
             setIsProcessing(false);
             setAnalysisLogs([]);
 
             // Factor Listing Phase (Embedded in Chat)
-            const factorList = data.situations.map((s, i) => `${i + 1}. ${s.label}`).join('\n');
-            addMessage('bot', `**DEEP ANALYSIS COMPLETE**\n\nI've analyzed your case and identified ${data.situations.length} key factors that will drive this decision:\n\n${factorList}\n\nI also found ${data.options.length} potential options to evaluate.`);
+            const factorList = mergedSituations.map((s, i) => `${i + 1}. ${s.label}`).join('\n');
+            addMessage('bot', `**DEEP ANALYSIS COMPLETE**\n\nI've prioritized your ${factors.length} focus factors along with ${data.situations.length} AI-identified variables:\n\n${factorList}\n\nI also found ${data.options.length} potential options to evaluate.`);
 
             setCurrentStep('ready');
         } catch (error) {
@@ -117,14 +148,14 @@ const ChatBot = () => {
     };
 
     const renderInputArea = () => {
-        if (currentStep === 'goal') {
+        if (currentStep === 'goal' || currentStep === 'factor') {
             return (
-                <form onSubmit={handleGoalSubmit} style={{ display: 'flex', gap: '1rem' }}>
+                <form onSubmit={currentStep === 'goal' ? handleGoalSubmit : handleFactorSubmit} style={{ display: 'flex', gap: '1rem' }}>
                     <input
                         type="text"
                         value={userInput}
                         onChange={(e) => setUserInput(e.target.value)}
-                        placeholder="Describe your case..."
+                        placeholder={currentStep === 'goal' ? "Describe your case..." : "Enter your priority factor..."}
                         className="input-field"
                         style={{ flex: 1, padding: '1rem', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', color: 'white', outline: 'none' }}
                     />
@@ -295,7 +326,7 @@ const ChatBot = () => {
 
                 <div style={{ borderTop: '1px solid var(--glass-border)', paddingTop: '1.5rem', background: 'rgba(0,0,0,0.2)', padding: '1.5rem', borderRadius: '15px' }}>
                     <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                        {currentStep === 'goal' ? 'Describe your case' : (currentStep === 'listing' ? 'Review identified factors' : (currentStep === 'questions' ? 'Rate Relevance (10 = High)' : 'Next Steps'))}
+                        {currentStep === 'goal' ? 'Describe your case' : (currentStep === 'factor' ? 'Your focus factors (comma-separated)' : (currentStep === 'listing' ? 'Review identified factors' : (currentStep === 'questions' ? 'Rate Relevance (10 = High)' : 'Next Steps')))}
                     </div>
                     {renderInputArea()}
                 </div>

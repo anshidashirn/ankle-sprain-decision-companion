@@ -8,6 +8,7 @@ I made this tool to help anyone who has a hard time making big choices. Sometime
 * **Deep Search Simulation**: The app simulates a deep industry search, scanning benchmarks and case studies to ensure the analysis is grounded in real-world data.
 * **Expert-Grade Recommendations**: No more generic names like "Laptop Pro". It searches for **real-world models** (like MacBook Pro M3 Max or Rivian R1S) to give you variety and variety—usually **5-6 specific options** per case!
 * **Simple Questions**: I made sure the app doesn't use big, confusing words. It asks you things like "Is it quiet there?" or "Do you want to save money?"
+* **Multi-Factor Personalization**: You can now input your own key priorities (separated by commas). The app treats your personal factors as top-level criteria alongside expert data.
 * **Dynamic Match Cards**: Instead of just a list, you get premium "Match Cards" with a percentage score telling you exactly how well each option fits your needs.
 
 ### Why I built it this way
@@ -18,9 +19,10 @@ I made this tool to help anyone who has a hard time making big choices. Sometime
 
 ### How to use it
 * **Step 1**: Tell the bot what you are thinking about doing.
-* **Step 2**: Look at the list of 8+ factors it finds. These are the things that will shape your choice.
-* **Step 3**: Answer the questions. Be honest about what you really care about!
-* **Step 4**: Read the results. They are long because they go deep into the logic of each choice.
+* **Step 2**: Enter one or more key factors you care about (e.g., "Budget, Longevity, Speed").
+* **Step 3**: Look at the list of 8+ factors it finds. Your personal factors will be at the top!
+* **Step 4**: Answer the simple questions for each factor.
+* **Step 5**: Read the results. They go deep into the logic for each specific recommendation.
 
 ### How to run it on your computer
 * First, you need to install the parts it needs by typing `npm install` in your terminal.
