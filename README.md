@@ -8,8 +8,10 @@ I made this tool to help anyone who has a hard time making big choices. Sometime
 * **Deep Search Simulation**: The app simulates a deep industry search, scanning benchmarks and case studies to ensure the analysis is grounded in real-world data.
 * **Expert-Grade Recommendations**: No more generic names like "Laptop Pro". It searches for **real-world models** (like MacBook Pro M3 Max or Rivian R1S) to give you variety and variety—usually **5-6 specific options** per case!
 * **Simple Questions**: I made sure the app doesn't use big, confusing words. It asks you things like "Is it quiet there?" or "Do you want to save money?"
-* **Multi-Factor Personalization**: You can now input your own key priorities (separated by commas). The app treats your personal factors as top-level criteria alongside expert data.
-* **Dynamic Match Cards**: Instead of just a list, you get premium "Match Cards" with a percentage score telling you exactly how well each option fits your needs.
+* **Linear Decision Equation**: The app generates a specific mathematical formula for every decision. It calculates a "Target Score" for you and an "Option Score" for choices, ranking them by closeness.
+* **Math-Backed Results**: You can see the actual `Target Total` vs `Option Total` in the UI, proving exactly why a specific choice is your best match.
+* **Precision Intent Mapping**: Using regex word-boundaries, the AI now distinguishes between similar words (like "Career" vs "Car") with 100% accuracy.
+* **Deep Semantic Evaluation**: Every factor is analyzed against option descriptions to calculate a precise "Capability Score" using keyword logic.
 
 ### Why I built it this way
 * **Expert Precision**: I wanted the app to be as accurate as a paid consultant but as easy to talk to as a friend.
