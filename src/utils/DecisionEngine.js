@@ -3,47 +3,63 @@
  * Calculates scores by weighting situational impacts by user relevance.
  */
 
-export const evaluateOptions = (options, situations, userAnswers) => {
-    /**
-     * options: Array of { id, name, description }
-     * situations: Array of { id, question, weights: { optionId: 0-10 } }
-     * userAnswers: Object of { situationId: 1-10 (relevance/yes-ness) }
-     */
+/**
+ * Situational Decision Engine (Ideal Match Edition)
+ * Calculates which option is mathematically closest to the user's "Ideal Profile".
+ */
 
-    const totalUserWeight = Object.values(userAnswers).reduce((sum, val) => sum + val, 0) || 1;
+/**
+ * Situational Decision Engine (Linear Equation Edition)
+ * Score = Σ (coefficient * value)
+ * Rank = |UserScore - OptionScore| (The "Ideal Match" distance)
+ */
+
+export const evaluateOptions = (options, situations, userAnswers) => {
+    // 1. Calculate Target Score for the User based on the Equation
+    let userTotalValue = 0;
+    situations.forEach(sit => {
+        const rating = parseFloat(userAnswers[sit.id] || 5);
+        const coeff = sit.coefficient || 1.0;
+        userTotalValue += coeff * rating;
+    });
 
     const evaluated = options.map(option => {
-        let rawScore = 0;
+        let optionTotalValue = 0;
         const breakdown = [];
 
         situations.forEach(sit => {
-            const userRelevance = parseFloat(userAnswers[sit.id] || 0);
-            const optionImpact = sit.weights[option.id] || 0;
+            const coeff = sit.coefficient || 1.0;
+            const capability = sit.weights[option.id] || 0;
+            const contribution = coeff * capability;
 
-            // The score contribution is how well the option handles this situation
-            // weighted by how relevant the situation is to the user.
-            const contribution = (optionImpact * userRelevance) / totalUserWeight;
+            optionTotalValue += contribution;
 
-            rawScore += contribution;
             breakdown.push({
-                criterion: sit.id.replace('_', ' ').toUpperCase(),
-                name: sit.question.split('?')[0].slice(0, 30) + '...',
-                score: optionImpact,
-                relevance: userRelevance,
-                impact: contribution.toFixed(2)
+                name: sit.label,
+                coeff: coeff,
+                val: capability,
+                contribution: contribution.toFixed(1)
             });
         });
 
-        // Normalize and generate reasoning
-        const finalScore = Math.max(0, Math.min(10, rawScore)).toFixed(2);
+        // Step 5: Analyse proximity to User's Target Value
+        const absoluteDifference = Math.abs(userTotalValue - optionTotalValue);
+
+        // Calculate a match percentage based on the relative closeness to the target
+        // Max possible difference is sum of coefficients * 10
+        const totalMax = situations.reduce((sum, s) => sum + (s.coefficient || 1.0) * 10, 0);
+        const matchPercentage = Math.max(0, 100 - (absoluteDifference / totalMax * 200)); // Magnify difference for sensitivity
 
         return {
             ...option,
-            score: finalScore,
+            userTotalValue: userTotalValue.toFixed(1),
+            optionTotalValue: optionTotalValue.toFixed(1),
+            matchPercentage: matchPercentage.toFixed(1),
             breakdown,
-            warnings: []
+            difference: absoluteDifference.toFixed(1)
         };
     });
 
-    return evaluated.sort((a, b) => b.score - a.score);
+    // Rank by smallest difference (Closest to target)
+    return evaluated.sort((a, b) => Math.abs(a.difference) - Math.abs(b.difference));
 };

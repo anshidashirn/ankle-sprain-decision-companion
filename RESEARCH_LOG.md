@@ -21,6 +21,7 @@
 8. "The descriptions for these expert options should be very detailed and technically accurate, but still in simple English."
 9. "i want to make a change, the factor that needed by the user should ask first, then only list the full factors including fctor from the user"
 10. "i mean, the user can enter different factors, enter with comma, the factors added by the user should list line by line and then remaining factirs list"
+11. "let me give my idea of the system, after generate the factors 1. Use Ai to generate a apted equation for that perticular case , 2. based on the value the user give through each 2-10 value, the it should calculate the value of the equation, 3. the important step is thi, collecting all the possible decisions, 4. calculate the value of the factors on the existing collected decisions, 5. analyse which value of the decisions closed to the value that got from user, 6. then show the result to user"
 
 ## What I Accepted
 - Weighted sum model driven by case-specific "Situations".

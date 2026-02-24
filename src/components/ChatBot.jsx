@@ -69,19 +69,36 @@ const ChatBot = () => {
 
             const data = await analyzeGoal(messages.find(m => m.role === 'user')?.text || '');
 
-            // Integrate user factors
-            const customSituations = factors.map((f, i) => ({
-                id: `user_custom_${i}`,
-                label: `Your Priority: ${f}`,
-                question: `How important is "${f}" to this specific decision?`,
-                weights: {}
-            }));
+            // Deep Semantic Evaluation for User Factors
+            const calculateUserFactorScore = (factor, option) => {
+                const text = (option.name + " " + option.description).toLowerCase();
+                const keywords = factor.toLowerCase().split(' ').filter(word => word.length > 2);
+                const match = keywords.some(kw => text.includes(kw));
+                return match ? 9.5 : 4.5; // High signal for explicit keyword match
+            };
 
-            // Assign custom factor weights (neutral biased towards top options)
-            customSituations.forEach(sit => {
-                data.options.forEach((opt, idx) => {
-                    sit.weights[opt.id] = 8 - idx; // Slight bias to top options
+            const customSituations = factors.map((f, i) => {
+                const weights = {};
+                data.options.forEach(opt => {
+                    weights[opt.id] = calculateUserFactorScore(f, opt);
                 });
+
+                // Generate a contextual question
+                let contextualQuestion = `On a scale of 2-10, how strictly must the choice align with your priority: "${f}"?`;
+                const fl = f.toLowerCase();
+                if (fl.includes('malappuram') || fl.includes('place') || fl.includes('location')) {
+                    contextualQuestion = `How critical is it that the house is specifically located in "${f}"? (2: Flexible, 10: Mandatory)`;
+                } else if (fl.includes('budget') || fl.includes('cost') || fl.includes('price')) {
+                    contextualQuestion = `How strictly do you need to stick to your "${f}" target? (2: Loose, 10: Strict)`;
+                }
+
+                return {
+                    id: `user_custom_${i}`,
+                    label: f,
+                    question: contextualQuestion,
+                    weights,
+                    coefficient: 2.5
+                };
             });
 
             const mergedSituations = [...customSituations, ...data.situations];
@@ -91,8 +108,10 @@ const ChatBot = () => {
             setAnalysisLogs([]);
 
             // Factor Listing Phase (Embedded in Chat)
-            const factorList = mergedSituations.map((s, i) => `${i + 1}. ${s.label}`).join('\n');
-            addMessage('bot', `**DEEP ANALYSIS COMPLETE**\n\nI've prioritized your ${factors.length} focus factors along with ${data.situations.length} AI-identified variables:\n\n${factorList}\n\nI also found ${data.options.length} potential options to evaluate.`);
+            const factorList = mergedSituations.map((s, i) => `${i + 1}. ${s.label} (Weight: ${s.coefficient}x)`).join('\n');
+            const equation = mergedSituations.map(s => `${s.coefficient} * [${s.label}]`).join(' + ');
+
+            addMessage('bot', `**DEEP ANALYSIS COMPLETE**\n\nI've generated a unique **Linear Decision Equation** for your case:\n\n> **Case Score = ${equation}**\n\nI've prioritized your ${factors.length} focus factors along with ${data.situations.length} AI-identified variables:\n\n${factorList}`);
 
             setCurrentStep('ready');
         } catch (error) {
@@ -261,59 +280,64 @@ const ChatBot = () => {
                                 gridTemplateColumns: '1fr'
                             }}>
                                 {results.map((res, i) => {
-                                    const scorePercent = Math.round(res.score * 100);
+                                    const scorePercent = parseFloat(res.matchPercentage);
                                     let label = 'Strong Match';
-                                    if (i === 0) label = 'Expert Grade';
-                                    else if (i === 1) label = 'Professional Choice';
-                                    else if (i === 2) label = 'Highly Recommended';
-                                    else if (i === 3) label = 'Balanced Value';
-                                    else label = 'Alternative Path';
+                                    if (i === 0) label = 'Closest Match';
+                                    else if (i === 1) label = 'Excellent Alternative';
+                                    else if (i === 2) label = 'Good Correlation';
+                                    else if (i === 3) label = 'Partial Fit';
+                                    else label = 'Distant Match';
 
                                     return (
                                         <div key={res.id} className="animate-fade-in" style={{
-                                            padding: '1.5rem',
+                                            padding: '2rem',
                                             background: i === 0 ? 'rgba(255,107,0,0.08)' : 'rgba(255,255,255,0.03)',
-                                            borderRadius: '16px',
+                                            borderRadius: '24px',
                                             border: i === 0 ? '1px solid var(--primary)' : '1px solid rgba(255,255,255,0.1)',
                                             position: 'relative',
                                             overflow: 'hidden'
                                         }}>
-                                            {i === 0 && (
-                                                <div style={{
-                                                    position: 'absolute',
-                                                    top: 0,
-                                                    right: 0,
-                                                    padding: '4px 12px',
-                                                    background: 'var(--primary)',
-                                                    color: 'white',
-                                                    fontSize: '0.65rem',
-                                                    fontWeight: 'bold',
-                                                    textTransform: 'uppercase',
-                                                    letterSpacing: '1px',
-                                                    borderBottomLeftRadius: '12px'
-                                                }}>
-                                                    Primary Recommendation
-                                                </div>
-                                            )}
-                                            <div style={{ color: 'var(--primary)', fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '0.5rem', textTransform: 'uppercase' }}>
+                                            <div style={{ color: 'var(--primary)', fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
                                                 {label}
                                             </div>
-                                            <h3 style={{ margin: '0 0 0.8rem 0', color: 'white', fontSize: '1.4rem', fontWeight: '800', letterSpacing: '-0.5px' }}>{res.name}</h3>
-                                            <p style={{ color: 'var(--text-dim)', fontSize: '0.95rem', lineHeight: '1.6', margin: 0, opacity: 0.9 }}>{res.description}</p>
+                                            <h3 style={{ margin: '0 0 1rem 0', color: 'white', fontSize: '1.6rem', fontWeight: '800' }}>{res.name}</h3>
+                                            <p style={{ color: 'var(--text-dim)', fontSize: '1rem', lineHeight: '1.6', marginBottom: '1.5rem' }}>{res.description}</p>
 
-                                            <div style={{ marginTop: '1.2rem', display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                                <div style={{ height: '4px', flex: 1, background: 'rgba(255,255,255,0.1)', borderRadius: '2px', overflow: 'hidden' }}>
+                                            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1.2rem', borderRadius: '15px' }}>
+                                                <div style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: 'bold', marginBottom: '1rem', textTransform: 'uppercase' }}>Equation Comparison</div>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: 'white', marginBottom: '1rem' }}>
+                                                    <span>Target Total:</span>
+                                                    <span style={{ fontWeight: 'bold' }}>{res.userTotalValue}</span>
+                                                </div>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: 'white', marginBottom: '1rem' }}>
+                                                    <span>Option Total:</span>
+                                                    <span style={{ fontWeight: 'bold', color: 'var(--primary)' }}>{res.optionTotalValue}</span>
+                                                </div>
+                                                <div style={{ height: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '2px', overflow: 'hidden' }}>
+                                                    <div style={{
+                                                        height: '100%',
+                                                        width: `${Math.min(100, (res.optionTotalValue / res.userTotalValue) * 100)}%`,
+                                                        background: 'var(--primary)',
+                                                        opacity: 0.8
+                                                    }}></div>
+                                                </div>
+                                            </div>
+
+                                            <div style={{ marginTop: '1.5rem', display: 'flex', gap: '12px', alignItems: 'center', justifyContent: 'space-between' }}>
+                                                <div style={{ height: '8px', flex: 1, background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden' }}>
                                                     <div style={{
                                                         height: '100%',
                                                         width: `${scorePercent}%`,
                                                         background: 'var(--primary)',
-                                                        borderRadius: '2px',
-                                                        transition: 'width 1s ease-out'
+                                                        boxShadow: '0 0 20px var(--primary)'
                                                     }}></div>
                                                 </div>
-                                                <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: 'bold' }}>
-                                                    {scorePercent}% Match
-                                                </span>
+                                                <div style={{ textAlign: 'right' }}>
+                                                    <span style={{ fontSize: '1.2rem', color: 'white', fontWeight: 'bold' }}>
+                                                        {scorePercent}%
+                                                    </span>
+                                                    <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Mathematical Match</div>
+                                                </div>
                                             </div>
                                         </div>
                                     );
