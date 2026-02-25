@@ -1,34 +1,52 @@
-# Helpful Decision Assistant
+# AI Decision Companion System
 
-I made this tool to help anyone who has a hard time making big choices. Sometimes life gives you too many options, and it’s tough to know which path is actually the best for you. This app acts like a smart friend who asks you simple questions to help you figure it out.
+A smart, AI-powered decision assistant that helps you make big choices clearly and confidently. Just type your goal and answer a few simple questions — the app will do the rest.
+
+---
 
 ### What does this do?
-* **It listens to your goal**: You just type in what you are trying to decide, like "Which city should I move to?" or "What kind of job should I get?"
-* **Advanced Knowledge Engine**: I've pre-loaded the app with data for **25+ specialized industries** (Tech, Finance, Real Estate, Automotive, etc.) to give you expert-grade accuracy.
-* **Deep Search Simulation**: The app simulates a deep industry search, scanning benchmarks and case studies to ensure the analysis is grounded in real-world data.
-* **Expert-Grade Recommendations**: No more generic names like "Laptop Pro". It searches for **real-world models** (like MacBook Pro M3 Max or Rivian R1S) to give you variety and variety—usually **5-6 specific options** per case!
-* **Simple Questions**: I made sure the app doesn't use big, confusing words. It asks you things like "Is it quiet there?" or "Do you want to save money?"
-* **Linear Decision Equation**: The app generates a specific mathematical formula for every decision. It calculates a "Target Score" for you and an "Option Score" for choices, ranking them by closeness.
-* **Math-Backed Results**: You can see the actual `Target Total` vs `Option Total` in the UI, proving exactly why a specific choice is your best match.
-* **Precision Intent Mapping**: Using regex word-boundaries, the AI now distinguishes between similar words (like "Career" vs "Car") with 100% accuracy.
-* **Deep Semantic Evaluation**: Every factor is analyzed against option descriptions to calculate a precise "Capability Score" using keyword logic.
 
-### Why I built it this way
-* **Expert Precision**: I wanted the app to be as accurate as a paid consultant but as easy to talk to as a friend.
-* **Simplicity is key**: I wanted the app to speak like a normal human. No technical jargon—just clear, easy English.
-* **Real-World Focus**: By using real products and specific strategies, the decisions feel real and actionable immediately.
-* **Deep Logic**: Even though the questions are simple, the logic under the hood is actually quite smart. It weighs everything you say to find the best possible match.
+- **Understands your goal**: Type anything — *"Which car should I buy?"*, *"Should I move to a new city?"*, or *"Which laptop is best for me?"*
+- **Real AI Factor Discovery**: Powered by **Groq (Llama 3.3 70B)**, the system autonomously discovers **8-13 expert-level situational factors** specific to your goal. No hardcoded data.
+- **Your Priorities First**: Enter your own criteria (e.g., "Budget, Comfort") — they are placed first and never duplicated with AI factors.
+- **Real-World Options**: The AI identifies **5-6 real products or paths** (e.g., Toyota Camry, Honda Civic, not generic placeholders).
+- **Mathematical Ranking**: A linear equation is applied using the AI-calculated weights. Results are ranked by mathematical closeness to your ideal profile.
+- **Simple to use**: All questions are in easy, plain English. No technical jargon.
+
+---
+
+### How to run it
+
+1. Install dependencies: `npm install`
+2. Create a `.env` file in the project root:
+   ```
+   VITE_GROQ_API_KEY=your_key_here
+   ```
+   Get a **free key** (14,400 req/day) at [console.groq.com](https://console.groq.com)
+3. Start the app: `npm run dev`
+4. Open `http://localhost:5173`
+
+---
 
 ### How to use it
-* **Step 1**: Tell the bot what you are thinking about doing.
-* **Step 2**: Enter one or more key factors you care about (e.g., "Budget, Longevity, Speed").
-* **Step 3**: Look at the list of 8+ factors it finds. Your personal factors will be at the top!
-* **Step 4**: Answer the simple questions for each factor.
-* **Step 5**: Read the results. They go deep into the logic for each specific recommendation.
 
-### How to run it on your computer
-* First, you need to install the parts it needs by typing `npm install` in your terminal.
-* Then, you start the app by typing `npm run dev`.
-* Finally, just go to `http://localhost:5173` in your web browser and start Deciding!
+1. **Step 1** — Type your decision goal.
+2. **Step 2** — Enter your personal priority factors (comma-separated).
+3. **Step 3** — Review the AI-generated factor list (8-13 items, your factors listed first).
+4. **Step 4** — Rate each factor's importance (1-10 scale).
+5. **Step 5** — Read the ranked results with expert explanations.
 
-I hope this tool helps you find the clarity you need for your next big step in life!
+---
+
+### Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | React 19, Vite 7 |
+| AI Engine | Groq API (Llama 3.3 70B) |
+| Decision Logic | Linear Scalar Equation (Distance-based ranking) |
+| Styling | Vanilla CSS |
+
+---
+
+*Built as a Decision Companion System — designed to think like an expert advisor.*

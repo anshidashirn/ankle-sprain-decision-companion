@@ -4,7 +4,7 @@ import { analyzeGoal } from '../utils/AIService';
 
 const ChatBot = () => {
     const [messages, setMessages] = useState([
-        { role: 'bot', text: "Hello! I'm your AI Situational Companion. Tell me, what's a major decision or case you're analyzing? (e.g., 'Moving to a new city', 'Choosing a career path')" }
+        { role: 'bot', text: "Hello! I'm your AI Situational Companion. Tell me, what's a major decision or case you're analyzing? (e.g., 'Buying a car', 'Buying a laptop', 'Choosing a career', 'Buying a house', 'Choosing a college')" }
     ]);
     const [currentStep, setCurrentStep] = useState('goal'); // 'goal', 'factor', 'analyzing', 'listing', 'questions', 'completed'
     const [userInput, setUserInput] = useState('');
@@ -52,14 +52,14 @@ const ChatBot = () => {
         setIsProcessing(true);
 
         try {
-            // DEEP SEARCH SIMULATION
+            // GROQ AI (Llama 3.3 70B) SEARCH
             const logs = [
-                "Initializing Wide-Spectrum Knowledge Engine...",
-                "Indexing relevant industry market data...",
-                "Cross-referencing 1.2M+ global case benchmarks...",
-                "Synthesizing specific expert-grade factors...",
-                "Drafting high-fidelity situational options...",
-                "Finalizing deep situational analysis..."
+                "Connecting to Groq LLM (Llama 3.3 70B)...",
+                "Analyzing semantic intent of your goal...",
+                "Generating dynamic situational factors...",
+                "Sourcing real-world expert options...",
+                "Constructing multi-dimensional decision matrix...",
+                "Synthesizing linear equation coefficients..."
             ];
 
             for (let i = 0; i < logs.length; i++) {
@@ -68,6 +68,15 @@ const ChatBot = () => {
             }
 
             const data = await analyzeGoal(messages.find(m => m.role === 'user')?.text || '');
+
+            if (data.mode === 'FALLBACK') {
+                setIsProcessing(false);
+                setAnalysisLogs([]);
+                const errorMsg = `⚠️ **AI Analysis Not Available**\n\nPlease set up your Groq API key in the .env file:\n\nVITE_GROQ_API_KEY=your_key_here\n\nGet a free key (14,400 req/day) at:\nhttps://console.groq.com`;
+                addMessage('bot', errorMsg);
+                setCurrentStep('goal');
+                return;
+            }
 
             // Deep Semantic Evaluation for User Factors
             const calculateUserFactorScore = (factor, option) => {
@@ -101,22 +110,38 @@ const ChatBot = () => {
                 };
             });
 
-            const mergedSituations = [...customSituations, ...data.situations];
+            const mergedSituations = [
+                ...customSituations,
+                // Deduplicate: skip AI factors that overlap with user-defined ones
+                ...data.situations.filter(aiSit => {
+                    const aiLabel = aiSit.label.toLowerCase();
+                    return !customSituations.some(userSit => {
+                        const userLabel = userSit.label.toLowerCase();
+                        // Check if either label contains key words from the other
+                        const userWords = userLabel.split(' ').filter(w => w.length > 3);
+                        return userWords.some(word => aiLabel.includes(word)) || aiLabel === userLabel;
+                    });
+                })
+            ];
             setDecisionData({ ...data, situations: mergedSituations });
 
             setIsProcessing(false);
             setAnalysisLogs([]);
 
             // Factor Listing Phase (Embedded in Chat)
-            const factorList = mergedSituations.map((s, i) => `${i + 1}. ${s.label} (Weight: ${s.coefficient}x)`).join('\n');
-            const equation = mergedSituations.map(s => `${s.coefficient} * [${s.label}]`).join(' + ');
+            const factorList = mergedSituations.map((s, i) => `${i + 1}. ${s.label}`).join('\n');
 
-            addMessage('bot', `**DEEP ANALYSIS COMPLETE**\n\nI've generated a unique **Linear Decision Equation** for your case:\n\n> **Case Score = ${equation}**\n\nI've prioritized your ${factors.length} focus factors along with ${data.situations.length} AI-identified variables:\n\n${factorList}`);
+            addMessage('bot', `**AI ANALYSIS COMPLETE**\n\nI've identified ${mergedSituations.length} situational factors for your case:\n\n${factorList}`);
 
             setCurrentStep('ready');
         } catch (error) {
             setIsProcessing(false);
-            addMessage('bot', "Sorry, I ran into an error analyzing those situations. Could you try rephrasing your goal?");
+            setAnalysisLogs([]);
+            const isKeyMissing = error.message === 'GROQ_API_KEY_MISSING';
+            const errorMsg = isKeyMissing
+                ? `⚠️ **Groq API Key Missing**\n\nAdd to your .env file:\nVITE_GROQ_API_KEY=your_key_here\n\nFree key (14,400 req/day): https://console.groq.com`
+                : `❌ AI Error: ${error.message}`;
+            addMessage('bot', errorMsg);
             setCurrentStep('goal');
         }
     };

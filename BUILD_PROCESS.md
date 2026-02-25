@@ -1,25 +1,50 @@
-# Build Process: Situational AI Decision Assistant
+# Build Process: AI Decision Companion System
 
 ## Architecture
 
-The system uses an AI-driven "Case Modeling" approach where decisions are broken down into specific situational scenarios.
+The system uses a **Generative AI Case Modeling** approach where a live LLM discovers and evaluates decision factors dynamically for any given goal.
+
+---
 
 ### 1. AIService (`src/utils/AIService.js`)
-- **Role**: Expert Knowledge Engine.
-- **Logic**: Analyzes the user's goal to map it to one of **25+ specialized industries** (Tech, Science, Finance, etc.).
-- **V11 Enhancement**: Removed all generic naming logic. The engine now returns **5-6 highly specific real-world recommendations** per goal (e.g., MacBook Pro M3 Max, Rivian R1S).
-- **Dynamic Weighting**: Automatically scales situational weights based on the number of options and the nature of the factor (Quality vs. Value).
+- **Role**: Generative AI Factor Discovery Engine.
+- **Provider**: [Groq API](https://console.groq.com) — Llama 3.3 70B (14,400 free req/day).
+- **Logic**: Sends the user's goal to the Groq LLM with a structured prompt. The AI autonomously brainstorms and returns **8-13 highly specific situational factors** and **5-6 real-world expert options** in a guaranteed `json_object` format.
+- **AI Scoring**: The LLM calculates performance weights (1.0–10.0) for each option against every factor, ensuring expert-level accuracy.
+- **Deduplication**: User-defined factors are merged first and cross-checked so AI factors never repeat user-entered criteria.
 
 ### 2. Decision Engine (`src/utils/DecisionEngine.js`)
-- **Role**: Impact Weighting & Evaluation.
-- **Scoring**: $Score = \frac{\sum (SituationImpact \times UserRelevance)}{\sum UserRelevance}$
-- **Logic**: Every expert option is evaluated based on its specific impact in the situations the user identifies as relevant.
+- **Role**: Linear Scalar Equation Evaluator.
+- **Scoring**: `OptionScore = Σ (coefficient × weight)` per factor.
+- **Ranking**: Computes `|UserScore − OptionScore|` to identify which option is mathematically closest to the user's ideal.
 
 ### 3. ChatBot UI (`src/components/ChatBot.jsx`)
-- **Role**: Conversational Deep Search.
-- **Flow**: Goal Input → **Deep Search Simulation (V10)** → Situational Analysis → Relevance Rating → **Expert Match Cards**.
+- **Role**: Conversational AI Interface.
+- **Flow**: Goal Input → Groq AI Analysis → Factor Review → Relevance Rating (1–10) → Ranked Expert Results.
 
-## Implementation Details (v11)
-- **High-Fidelity Realism**: Explicitly using real-world manufacturers and models for actionable results.
-- **Industry scaling**: Expanded to 25+ categories with technical, expert-grade descriptions.
-- **Dynamic Results UX**: UI scales to handle 5+ ranked recommendations with live match percentage.
+---
+
+## Setup
+
+```bash
+npm install
+```
+
+Create a `.env` file:
+```
+VITE_GROQ_API_KEY=your_key_here
+```
+
+Run:
+```bash
+npm run dev
+```
+
+---
+
+## Implementation Notes (v18)
+
+- **Generative AI**: All factors and options are discovered live — no hardcoded knowledge base.
+- **Structured JSON Output**: Groq is instructed to return `json_object` format for reliable parsing.
+- **Coefficient Logic**: Factors containing keywords like "cost", "budget", or "safety" are automatically assigned a higher coefficient (2.5×).
+- **Clean UX**: Equation display removed. Factor list is clean and numbered. Results show match percentage and expert descriptions.
