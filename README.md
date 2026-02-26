@@ -38,7 +38,7 @@ This project acts more like a structured decision companion than a recommendatio
 ## 2. Assumptions Made
 
 - Users can describe their decision goal clearly in text.
-- Users can provide at least one personal priority.
+- Users can provide their personal priority.
 - A 1–10 importance scale is intuitive enough.
 - LLM-generated factors are contextually accurate.
 - Linear distance-based ranking is sufficient for an MVP.
@@ -59,10 +59,10 @@ This keeps the user in control from the start.
 
 ### 2. AI Intelligence Layer (Groq + Llama 3.3 70B)
 The AI:
-- Discovers 8–13 relevant decision factors
+- Discovers  relevant decision factors
 - Places user priorities first
 - Avoids duplication
-- Identifies 5–6 real-world options
+- Identifies  real-world options that comes under this goal
 
 I chose dynamic AI factor discovery instead of hardcoding categories to keep the system domain-agnostic.
 
