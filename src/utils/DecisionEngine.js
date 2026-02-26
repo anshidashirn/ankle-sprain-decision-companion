@@ -29,21 +29,22 @@ export const evaluateOptions = (options, criteria, userWeights, optionWeights = 
             });
         });
 
-        // Apply Option Weight (Multiplier Effect)
-        const optionWeightValue = parseFloat(optionWeights[option.id] || 5); // Default to middle ground if not provided
-        const finalScore = absoluteScore * (optionWeightValue / 5); // Scale relative to 5 (neutral)
+        // Apply Option Weight (Multiplier Effect) - Baseline Preference
+        const optionWeightValue = parseFloat(optionWeights[option.id] || 5);
+        const finalScore = absoluteScore * (optionWeightValue / 5);
         const finalMax = maxPossibleScore * (optionWeightValue / 5);
 
-        const matchPercentage = finalMax > 0
-            ? (finalScore / finalMax) * 100
-            : 0;
+        // Granular Metrics
+        const needFit = maxPossibleScore > 0 ? (absoluteScore / maxPossibleScore) * 100 : 0;
+        const matchPercentage = finalMax > 0 ? (finalScore / finalMax) * 100 : 0;
 
         return {
             ...option,
             optionWeight: optionWeightValue,
-            score: finalScore.toFixed(1),
+            needFit: needFit.toFixed(1), // How well it matches user criteria specifically
+            score: finalScore.toFixed(1), // Balanced final score
             matchPercentage: matchPercentage.toFixed(1),
-            breakdown: breakdown.sort((a, b) => b.performance - a.performance) // Sort by strengths
+            breakdown: breakdown.sort((a, b) => b.performance - a.performance)
         };
     });
 

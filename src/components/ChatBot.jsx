@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { evaluateOptions } from '../utils/DecisionEngine';
-import { analyzeCase } from '../utils/AIService';
 
 const ChatBot = () => {
     const [messages, setMessages] = useState([
@@ -41,13 +40,13 @@ const ChatBot = () => {
         addMessage('user', userInput);
         setUserInput('');
         setCurrentStep('options');
-        addMessage('bot', "Great. Do you have specific **Options** in mind? (Enter them comma-separated, or type 'none' to let AI suggest some).");
+        addMessage('bot', "Great. Do you have specific **Options** in mind? (Enter them comma-separated).");
     };
 
     const handleOptionsSubmit = (e) => {
         e.preventDefault();
         if (!userInput.trim()) return;
-        const opts = userInput.toLowerCase() === 'none' ? [] : userInput.split(',').map(o => o.trim()).filter(o => o);
+        const opts = userInput.split(',').map(o => o.trim()).filter(o => o);
         setUserOptions(opts);
         addMessage('user', userInput);
         setUserInput('');
@@ -55,7 +54,7 @@ const ChatBot = () => {
         addMessage('bot', "And what **Criteria** or factors are important to you? (e.g., 'Cost, Safety, Quality').");
     };
 
-    const handleCriteriaSubmit = async (e) => {
+    const handleCriteriaSubmit = (e) => {
         e.preventDefault();
         if (!userInput.trim()) return;
 
@@ -69,45 +68,37 @@ const ChatBot = () => {
         addMessage('user', userInput);
         setUserInput('');
         setCurrentStep('analyzing');
-        setIsProcessing(true);
 
-        try {
-            const logs = [
-                "Initializing decision matrix...",
-                "Consulting AI for structural definitions...",
-                "Generating criteria questions...",
-                "Validating option attributes..."
-            ];
+        // Final structural data (Local only, no AI)
+        const data = {
+            goal: goal,
+            options: userOptions.map((name, i) => ({ id: `o${i + 1}`, name, description: `User-defined choice: ${name}` })),
+            criteria: crits.map((label, i) => ({
+                id: `c${i + 1}`,
+                label,
+                question: `On a scale of 2-10, how important is **${label}**?`,
+                weights: {}
+            }))
+        };
 
-            for (const log of logs) {
-                setAnalysisLogs(prev => [...prev, log]);
-                await new Promise(r => setTimeout(r, 600));
-            }
-
-            const data = await analyzeCase(goal, userOptions, crits);
-
-            // Initialize manual scores with default (5) or empty
-            const initialScores = {};
-            data.criteria.forEach(c => {
-                initialScores[c.id] = {};
-                data.options.forEach(o => {
-                    initialScores[c.id][o.id] = 5; // Start with neutral
-                });
+        // Initialize manual scores
+        const initialScores = {};
+        data.criteria.forEach(c => {
+            initialScores[c.id] = {};
+            data.options.forEach(o => {
+                initialScores[c.id][o.id] = 6; // Default starting value
             });
-            setManualScores(initialScores);
+        });
 
-            setDecisionData(data);
-            setIsProcessing(false);
-            setAnalysisLogs([]);
+        setManualScores(initialScores);
+        setDecisionData(data);
 
-            addMessage('bot', `**Framework Ready.** I've populated ${data.options.length} options and used your ${data.criteria.length} custom criteria.\n\nNow, let's weigh the importance of each criterion for your personal situation.`);
-            setCurrentStep('ready_to_weigh_criteria');
-        } catch (error) {
-            setIsProcessing(false);
-            setAnalysisLogs([]);
-            addMessage('bot', `❌ Error: ${error.message}`);
-            setCurrentStep('goal');
-        }
+        // Form the explicit WSM Equation string
+        const critTerms = data.criteria.map(c => `(W_${c.label.replace(/\s+/g, '')} × P_${c.label.replace(/\s+/g, '')})`).join(' + ');
+        const equation = `Score = W_opt × [ ${critTerms} ]`;
+
+        addMessage('bot', `**Framework Ready.** I've organized your ${data.options.length} options and ${data.criteria.length} criteria.\n\n### 📐 Mathematical Equation\nFormula for this case:\n\`\`\`math\n${equation}\n\`\`\`\n\nNow, let's weigh the importance of each criterion.`);
+        setCurrentStep('ready_to_weigh_criteria');
     };
 
     const startWeightingCriteria = () => {
