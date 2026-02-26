@@ -1,13 +1,12 @@
 /**
- * AIService.js - Powered by Groq API (Llama 3.3 70B)
- * Groq provides 14,400 free requests/day with fast inference.
- * Get your free key at: https://console.groq.com
+ * AIService.js - Modular Decision Assistant
+ * Uses Groq API (Llama 3.3 70B) to fill missing parts of the decision framework.
  */
 
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 const GROQ_MODEL = "llama-3.3-70b-versatile";
 
-export const analyzeGoal = async (goal) => {
+export const analyzeCase = async (goal, options = [], criteria = []) => {
     const apiKey = import.meta.env.VITE_GROQ_API_KEY;
 
     if (!apiKey || apiKey === "your_groq_api_key_here") {
@@ -15,36 +14,25 @@ export const analyzeGoal = async (goal) => {
     }
 
     const prompt = `
-        You are a world-class strategic decision analyst. Analyze this decision goal and generate a comprehensive factor list.
-        
-        GOAL: "${goal}"
+        You are a world-class strategic decision analyst. Your task is to assist in defining the structure of a decision framework.
+
+        CASE GOAL: "${goal}"
+        USER OPTIONS: ${options.length > 0 ? options.join(', ') : 'None provided'}
+        USER CRITERIA: ${criteria.join(', ')}
 
         INSTRUCTIONS:
-        1. Think deeply about every dimension of this decision:
-           - Financial (cost, ROI, fees, resale, maintenance)
-           - Functional (performance, specs, lifespan, reliability)
-           - Social (status, community, family impact, networking)
-           - Psychological (stress, satisfaction, confidence, peace of mind)
-           - Risk (safety, volatility, legal, data privacy)
-           - Contextual (location, availability, environment, convenience)
-           - Long-term (future value, scalability, upgradability, exit)
-        
-        2. Identify exactly 8-13 HIGHLY SPECIFIC factors for this exact goal (no more, no less).
-        3. Identify 5-6 REAL, SPECIFIC options (real brands/models/paths, not generic names).
-        4. For each factor, score each option from 1.0 to 10.0 based on true expert knowledge.
+        1. If OPTIONS are missing, suggest 4-5 REAL, SPECIFIC, and diverse options.
+        2. STRICTLY USE ONLY the provided USER CRITERIA labels.
+        3. For EACH criterion, provide a concise weighting question for the user.
+        4. Focus on professional structural definitions.
 
-        RETURN ONLY valid JSON (no markdown, no extra text):
+        RETURN ONLY valid JSON:
         {
-          "situations": [
-            {
-              "id": "s1",
-              "label": "Factor Name",
-              "question": "Simple 1-10 question",
-              "weights": { "o1": 9.5, "o2": 4.0, "o3": 7.5, "o4": 8.0, "o5": 6.5 }
-            }
+          "criteria": [
+            { "id": "c1", "label": "Criterion Name", "question": "Brief weighting question (e.g. 'How important is cost?')" }
           ],
           "options": [
-            { "id": "o1", "name": "Real Product/Brand Name", "description": "Expert explanation in simple words." }
+            { "id": "o1", "name": "Option Name", "description": "Expert summary." }
           ]
         }
     `;
@@ -58,35 +46,23 @@ export const analyzeGoal = async (goal) => {
         body: JSON.stringify({
             model: GROQ_MODEL,
             messages: [{ role: "user", content: prompt }],
-            temperature: 0.7,
-            max_tokens: 4096,
+            temperature: 0.1, // Low temp for factual consistency
+            max_tokens: 4000,
             response_format: { type: "json_object" }
         })
     });
 
     if (!response.ok) {
         const err = await response.json();
-        const msg = err?.error?.message || "Unknown Groq API error";
-        throw new Error(`Groq API Error (${response.status}): ${msg}`);
+        throw new Error(`Groq API Error: ${err?.error?.message || "Unknown"}`);
     }
 
     const data = await response.json();
-    const text = data.choices?.[0]?.message?.content;
-    if (!text) throw new Error("Empty response from Groq API");
+    const parsed = JSON.parse(data.choices[0].message.content);
 
-    const parsed = JSON.parse(text);
-    const { situations, options } = parsed;
-
-    if (!situations || !options || situations.length === 0) {
-        throw new Error("Invalid data structure from AI");
-    }
-
-    // Auto-assign coefficients based on factor importance
-    const processedSituations = situations.map(s => {
-        const low = s.label.toLowerCase();
-        const isHighPriority = low.includes('cost') || low.includes('budget') || low.includes('safety') || low.includes('critical');
-        return { ...s, coefficient: isHighPriority ? 2.5 : 1.0 };
-    });
-
-    return { situations: processedSituations, options, mode: "AI" };
+    // Return structural data only
+    return {
+        criteria: parsed.criteria.map(crit => ({ ...crit, weights: {} })),
+        options: parsed.options
+    };
 };

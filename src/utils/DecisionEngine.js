@@ -1,65 +1,69 @@
 /**
- * Situational Decision Engine
- * Calculates scores by weighting situational impacts by user relevance.
+ * Structured Decision Engine (MCDA - Weighted Sum Model)
+ * 1. Score = Σ (Value_opt,crit * Weight_user,crit)
+ * 2. Normalization to 100%
+ * 3. Narrative Explanation Generation
  */
 
-/**
- * Situational Decision Engine (Ideal Match Edition)
- * Calculates which option is mathematically closest to the user's "Ideal Profile".
- */
-
-/**
- * Situational Decision Engine (Linear Equation Edition)
- * Score = Σ (coefficient * value)
- * Rank = |UserScore - OptionScore| (The "Ideal Match" distance)
- */
-
-export const evaluateOptions = (options, situations, userAnswers) => {
-    // 1. Calculate Target Score for the User based on the Equation
-    let userTotalValue = 0;
-    situations.forEach(sit => {
-        const rating = parseFloat(userAnswers[sit.id] || 5);
-        const coeff = sit.coefficient || 1.0;
-        userTotalValue += coeff * rating;
-    });
-
+export const evaluateOptions = (options, criteria, userWeights, optionWeights = {}) => {
+    // 1. Calculate weighted scores for each option
     const evaluated = options.map(option => {
-        let optionTotalValue = 0;
+        let absoluteScore = 0;
+        let maxPossibleScore = 0;
         const breakdown = [];
 
-        situations.forEach(sit => {
-            const coeff = sit.coefficient || 1.0;
-            const capability = sit.weights[option.id] || 0;
-            const contribution = coeff * capability;
+        criteria.forEach(crit => {
+            const weight = parseFloat(userWeights[crit.id] || 5); // User importance (1-10)
+            const performance = crit.weights[option.id] || 0;    // Option performance on this crit (1-10)
 
-            optionTotalValue += contribution;
+            const contribution = weight * performance;
+            absoluteScore += contribution;
+            maxPossibleScore += weight * 10; // Max performance is 10
 
             breakdown.push({
-                name: sit.label,
-                coeff: coeff,
-                val: capability,
+                id: crit.id,
+                name: crit.label,
+                weight: weight,
+                performance: performance,
                 contribution: contribution.toFixed(1)
             });
         });
 
-        // Step 5: Analyse proximity to User's Target Value
-        const absoluteDifference = Math.abs(userTotalValue - optionTotalValue);
+        // Apply Option Weight (Multiplier Effect)
+        const optionWeightValue = parseFloat(optionWeights[option.id] || 5); // Default to middle ground if not provided
+        const finalScore = absoluteScore * (optionWeightValue / 5); // Scale relative to 5 (neutral)
+        const finalMax = maxPossibleScore * (optionWeightValue / 5);
 
-        // Calculate a match percentage based on the relative closeness to the target
-        // Max possible difference is sum of coefficients * 10
-        const totalMax = situations.reduce((sum, s) => sum + (s.coefficient || 1.0) * 10, 0);
-        const matchPercentage = Math.max(0, 100 - (absoluteDifference / totalMax * 200)); // Magnify difference for sensitivity
+        const matchPercentage = finalMax > 0
+            ? (finalScore / finalMax) * 100
+            : 0;
 
         return {
             ...option,
-            userTotalValue: userTotalValue.toFixed(1),
-            optionTotalValue: optionTotalValue.toFixed(1),
+            optionWeight: optionWeightValue,
+            score: finalScore.toFixed(1),
             matchPercentage: matchPercentage.toFixed(1),
-            breakdown,
-            difference: absoluteDifference.toFixed(1)
+            breakdown: breakdown.sort((a, b) => b.performance - a.performance) // Sort by strengths
         };
     });
 
-    // Rank by smallest difference (Closest to target)
-    return evaluated.sort((a, b) => Math.abs(a.difference) - Math.abs(b.difference));
+    // 2. Rank by score descending
+    const ranked = evaluated.sort((a, b) => b.score - a.score);
+
+    // 3. Generate reasoning for each
+    return ranked.map((res, index) => {
+        const topStrength = res.breakdown[0];
+        const weakestPoint = res.breakdown[res.breakdown.length - 1];
+
+        let reasoning = `${res.name} ranks #${index + 1} with a ${res.matchPercentage}% match. `;
+        reasoning += `It excels particularly in **${topStrength.name}** (rated ${topStrength.performance}/10). `;
+
+        if (parseFloat(weakestPoint.performance) < 5) {
+            reasoning += `However, it may be weaker in terms of **${weakestPoint.name}**.`;
+        } else {
+            reasoning += `It also maintains a solid standard across other criteria.`;
+        }
+
+        return { ...res, reasoning };
+    });
 };
