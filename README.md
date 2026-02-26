@@ -1,52 +1,64 @@
-# AI Decision Companion System
+# Decision Companion System v2.0
 
-A smart, AI-powered decision assistant that helps you make big choices clearly and confidently. Just type your goal and answer a few simple questions — the app will do the rest.
-
----
-
-### What does this do?
-
-- **Understands your goal**: Type anything — *"Which car should I buy?"*, *"Should I move to a new city?"*, or *"Which laptop is best for me?"*
-- **Real AI Factor Discovery**: Powered by **Groq (Llama 3.3 70B)**, the system autonomously discovers **8-13 expert-level situational factors** specific to your goal. No hardcoded data.
-- **Your Priorities First**: Enter your own criteria (e.g., "Budget, Comfort") — they are placed first and never duplicated with AI factors.
-- **Real-World Options**: The AI identifies **5-6 real products or paths** (e.g., Toyota Camry, Honda Civic, not generic placeholders).
-- **Mathematical Ranking**: A linear equation is applied using the AI-calculated weights. Results are ranked by mathematical closeness to your ideal profile.
-- **Simple to use**: All questions are in easy, plain English. No technical jargon.
+A high-performance, structured decision-making framework that combines human intuition with mathematical rigor. Unlike "black-box" AI tools, this system uses a **Transparent Multi-Criteria Decision Analysis (MCDA)** model to rank your options based on your specific priorities.
 
 ---
 
-### How to run it
+### 🛡️ Structured Workflow
 
-1. Install dependencies: `npm install`
-2. Create a `.env` file in the project root:
-   ```
-   VITE_GROQ_API_KEY=your_key_here
-   ```
-   Get a **free key** (14,400 req/day) at [console.groq.com](https://console.groq.com)
-3. Start the app: `npm run dev`
-4. Open `http://localhost:5173`
+The system enforces a disciplined decision architecture to ensure maturity and clarity:
 
----
-
-### How to use it
-
-1. **Step 1** — Type your decision goal.
-2. **Step 2** — Enter your personal priority factors (comma-separated).
-3. **Step 3** — Review the AI-generated factor list (8-13 items, your factors listed first).
-4. **Step 4** — Rate each factor's importance (1-10 scale).
-5. **Step 5** — Read the ranked results with expert explanations.
+1.  **Goal Definition**: Clearly state what you are deciding (e.g., "Choosing a new career path").
+2.  **Structural Setup**:
+    -   **Options**: Define your choices (e.g., "Software Engineering, Data Science"). AI can suggest missing options.
+    -   **Criteria**: Strictly define the factors that matter to you (e.g., "Salary, Work-Life Balance").
+3.  **Dual-Weighting Phase**:
+    -   **Criteria Weights**: Rate the importance of each criterion (2, 4, 6, 8, or 10).
+    -   **Option Weights**: Rate your baseline trust or preference for each option (2, 4, 6, 8, or 10).
+4.  **Interactive Decision Matrix**: You manually input performance scores (**2, 4, 6, 8, or 10**) for every Option vs Criterion combination in the table.
+5.  **Mathematical Evaluation**: The engine applies the **Dual-Weighted Sum Model** to calculate fractional match percentages and ranked results.
 
 ---
 
-### Tech Stack
+### ⚛️ Mathematical Model
 
-| Layer | Technology |
+The system uses a refined **Weighted Sum Model (WSM)**:
+
+$$FinalScore = OptionWeight \times \sum (CritWeight \times PerformanceScore)$$
+
+This ensures that your professional intuition (Option Weight) is numerically integrated with objective factor analysis (Criteria Performance).
+
+---
+
+### 🚀 Getting Started
+
+1.  **Install Dependencies**:
+    ```bash
+    npm install
+    ```
+2.  **Configure Environment**:
+    Create a `.env` file in the root:
+    ```env
+    VITE_GROQ_API_KEY=your_groq_api_key_here
+    ```
+    *Get your key at [console.groq.com](https://console.groq.com)*
+3.  **Run Development Server**:
+    ```bash
+    npm run dev
+    ```
+4.  **Access App**: Open `http://localhost:5173`
+
+---
+
+### 🛠️ Tech Stack
+
+| Component | Technology |
 |---|---|
-| Frontend | React 19, Vite 7 |
-| AI Engine | Groq API (Llama 3.3 70B) |
-| Decision Logic | Linear Scalar Equation (Distance-based ranking) |
-| Styling | Vanilla CSS |
+| **UI Framework** | React 19 + Vite 7 |
+| **Logic Engine** | Vanilla JavaScript (MCDA / WSM) |
+| **Styling** | Modern CSS (Glassmorphism & Gradients) |
+| **AI Layer** | Groq API (Structural support only) |
 
 ---
 
-*Built as a Decision Companion System — designed to think like an expert advisor.*
+*Moving decision making from gut feeling to architectural clarity.*
