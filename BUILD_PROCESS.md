@@ -1,50 +1,27 @@
-# Build Process: AI Decision Companion System
+# Build Process & Architectural Evolution
 
-## Architecture
+This document traces the development of the Decision Companion System from a simple calculator to a mathematically rigorous MCDA engine.
 
-The system uses a **Generative AI Case Modeling** approach where a live LLM discovers and evaluates decision factors dynamically for any given goal.
+### Phase 1: The Simple Sum (v1.0)
+*   **Initial Build**: Basic linear sum $Score = \sum Performance$.
+*   **Realization**: Without weights, all factors were treated as equally important, which is rarely true in human decision-making.
+*   **Decision**: Introduced **Criterion Weights**.
 
----
+### Phase 2: Multiplier Dominance (v1.2)
+*   **Addition**: Added "Option Trust" as a raw multiplier.
+*   **Problem**: Realized a high trust score could cause "Score Explosion," where an option wins solely on brand loyalty regardless of poor technical performance.
+*   **Decision**: Switched to **Vector Normalization**.
 
-### 1. AIService (`src/utils/AIService.js`)
-- **Role**: Generative AI Factor Discovery Engine.
-- **Provider**: [Groq API](https://console.groq.com) — Llama 3.3 70B (14,400 free req/day).
-- **Logic**: Sends the user's goal to the Groq LLM with a structured prompt. The AI autonomously brainstorms and returns **8-13 highly specific situational factors** and **5-6 real-world expert options** in a guaranteed `json_object` format.
-- **AI Scoring**: The LLM calculates performance weights (1.0–10.0) for each option against every factor, ensuring expert-level accuracy.
-- **Deduplication**: User-defined factors are merged first and cross-checked so AI factors never repeat user-entered criteria.
+### Phase 3: The Normalized Refactor (v1.5)
+*   **Refactor**: All weights are now normalized to sum to 1.0. Intuition is treated as a balanced internal criterion.
+*   **Benefit**: This removed scale-dependency and prevented any single factor from unbounded dominance.
+*   **Documentation**: Removed the explicit equation display from the UI to focus on "Decision Quality" rather than math homework.
 
-### 2. Decision Engine (`src/utils/DecisionEngine.js`)
-- **Role**: Linear Scalar Equation Evaluator.
-- **Scoring**: `OptionScore = Σ (coefficient × weight)` per factor.
-- **Ranking**: Computes `|UserScore − OptionScore|` to identify which option is mathematically closest to the user's ideal.
-
-### 3. ChatBot UI (`src/components/ChatBot.jsx`)
-- **Role**: Conversational AI Interface.
-- **Flow**: Goal Input → Groq AI Analysis → Factor Review → Relevance Rating (1–10) → Ranked Expert Results.
-
----
-
-## Setup
-
-```bash
-npm install
-```
-
-Create a `.env` file:
-```
-VITE_GROQ_API_KEY=your_key_here
-```
-
-Run:
-```bash
-npm run dev
-```
+### Phase 4: Sensitivity & Explainability (v2.0 - Current)
+*   **Optimization**: Realized users didn't understand *why* an option won.
+*   **New Feature**: Added the **Explanation Engine** (Dominant Drivers & Contrarian Risk).
+*   **Maturity Drop**: Added **Sensitivity Analysis**. The system now identifies "Pivot Factors"—the exact point where a user's preference would change the outcome.
+*   **Tech Stack Evolution**: Moved from a simple CLI concept to a **React-based Matrix UI** because complex multi-criteria scoring is cognitively impossible to manage without a visual grid.
 
 ---
-
-## Implementation Notes (v18)
-
-- **Generative AI**: All factors and options are discovered live — no hardcoded knowledge base.
-- **Structured JSON Output**: Groq is instructed to return `json_object` format for reliable parsing.
-- **Coefficient Logic**: Factors containing keywords like "cost", "budget", or "safety" are automatically assigned a higher coefficient (2.5×).
-- **Clean UX**: Equation display removed. Factor list is clean and numbered. Results show match percentage and expert descriptions.
+*Architectural Objective: Moving from "What is the answer?" to "Why is this the answer?"*

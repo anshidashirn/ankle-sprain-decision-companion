@@ -93,11 +93,9 @@ const ChatBot = () => {
         setManualScores(initialScores);
         setDecisionData(data);
 
-        // Form the explicit WSM Equation string
-        const critTerms = data.criteria.map(c => `(W_${c.label.replace(/\s+/g, '')} × P_${c.label.replace(/\s+/g, '')})`).join(' + ');
-        const equation = `Score = W_opt × [ ${critTerms} ]`;
+        addMessage('bot', `**Framework Configured.** I've organized your **${data.options.length} options** and **${data.criteria.length} criteria**.
 
-        addMessage('bot', `**Framework Ready.** I've organized your ${data.options.length} options and ${data.criteria.length} criteria.\n\n### 📐 Mathematical Equation\nFormula for this case:\n\`\`\`math\n${equation}\n\`\`\`\n\nNow, let's weigh the importance of each criterion.`);
+Now, let's determine the relative importance of each factor to create your personalized decision model.`);
         setCurrentStep('ready_to_weigh_criteria');
     };
 
@@ -339,8 +337,29 @@ const ChatBot = () => {
                     {results && (
                         <div className="animate-fade-in" style={{ marginTop: '2rem' }}>
                             <h2 style={{ color: 'white', marginBottom: '2rem', textAlign: 'center' }}>Ranked Recommendations</h2>
+
+                            {results.sensitivity?.pivotFound && (
+                                <div style={{
+                                    background: 'rgba(255, 107, 0, 0.05)',
+                                    border: '1px solid var(--primary)',
+                                    padding: '1.2rem',
+                                    borderRadius: '16px',
+                                    marginBottom: '2rem',
+                                    fontSize: '0.9rem',
+                                    color: 'var(--text)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '12px'
+                                }}>
+                                    <span style={{ fontSize: '1.2rem' }}>⚖️</span>
+                                    <span>
+                                        **Sensitivity Insight**: If you increased the importance of **{results.sensitivity.factor}** by just **{results.sensitivity.requiredDelta}%**, the top recommendation would flip.
+                                    </span>
+                                </div>
+                            )}
+
                             <div style={{ display: 'grid', gap: '1.5rem' }}>
-                                {results.map((res, i) => (
+                                {results.ranked.map((res, i) => (
                                     <div key={res.id} style={{
                                         padding: '2rem',
                                         background: i === 0 ? 'rgba(255,107,0,0.1)' : 'rgba(255,255,255,0.03)',
@@ -354,7 +373,7 @@ const ChatBot = () => {
                                         <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem', marginBottom: '1rem' }}>{res.description}</p>
 
                                         <div style={{ background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '12px', marginBottom: '1rem' }}>
-                                            <div style={{ fontSize: '0.85rem', color: 'white', fontWeight: '500' }}>Reasoning:</div>
+                                            <div style={{ fontSize: '0.85rem', color: 'white', fontWeight: '500' }}>Executive Reasoning:</div>
                                             <div style={{ fontSize: '0.85rem', color: 'var(--text-dim)', marginTop: '0.4rem', fontStyle: 'italic' }}>
                                                 {res.reasoning}
                                             </div>
