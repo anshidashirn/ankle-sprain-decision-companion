@@ -59,6 +59,24 @@ The calculation runs in **O(n × m)** time, where:
 
 ---
 
+### Visual Architecture & Design
+
+To better understand the system's structure and data flow, please refer to the following design diagrams:
+
+#### 1. System Architecture
+![System Architecture](<./Design Diagrams/AFF.drawio.png>)
+*High-level overview of the local-only, deterministic architecture.*
+
+#### 2. Component Diagram
+![Component Diagram](<./Design Diagrams/CDIA.drawio.png>)
+*Visualizing the relationship between React components and the Logic Engine.*
+
+#### 3. Data Flow Diagram (DFD)
+![Data Flow Diagram](<./Design Diagrams/dfd2.drawio.png>)
+*Tracing the journey of user input into weighted results.*
+
+---
+
 ### Architectural Rationale (The "Why")
 
 #### 1. Why Weighted Sum Model (WSM)?
@@ -82,7 +100,7 @@ To ensure results are balanced and not distorted by large numbers, the system no
 User-defined importance values are converted into proportions so that all weights sum to 1.
 
 \[
-NormalizedWeight_i = \frac{w_i}{\sum_{j=1}^{n} w_j}
+\text{NormalizedWeight}_i = \frac{w_i}{\sum_{j=1}^{n} w_j}
 \]
 
 Where:
