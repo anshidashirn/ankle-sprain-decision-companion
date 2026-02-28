@@ -1,57 +1,211 @@
-- [2026-02-23] **Pivot to Generalized AI Decision Companion**. Refactored logic to handle any decision by using simulated AI to discover criteria and options dynamically.
-- [2026-02-23] **Situational Analysis Refactor**. Moved from abstract criteria to scenario-based modeling.
-- [2026-02-23] **v10: High-Fidelity AI Specificity**. Expanded knowledge base to 25+ specialized industries with "Deep Search" simulation UI.
-- [2026-02-23] **v11: Expert Precision & Variety**. Removed all generic naming (e.g., "Pro Elite"). Expanded every category to 5-6 highly specific real-world models (e.g., MacBook Pro M3 Max, Rivian R1S).
-- [2026-02-24] **User-First Multi-Factor Flow**. Introduced the ability for users to define their own primary criteria via comma-separated input before the AI analysis runs.
-- [2026-02-24] **v12: Ideal Match Linear Engine**. Replaced weighted sum with distance-based scalar matching. Implemented **Strict Linear Equations** and **Deep Semantic Selection** (Keyword Intent Extraction). Added word-boundary regex to prevent intent collisions (e.g., "Career" vs "Car").
-- [2026-02-25] **v13: Real AI Transformation**. Removed the hardcoded 25+ industry knowledge base. Integrated **Google Gemini Pro (API)** to dynamically generate factors and options for ANY user goal. Implemented dynamic linear equation generation for every case.
-- [2026-02-25] **v14: AI-Guided Weighting & Deep Thinking**. Enhanced Gemini prompt to force "Step-by-Step Thinking" on goal nuances. Refactored engine to let Gemini directly calculate option weights for each factor.
-- [2026-02-25] **v15: Maximum Exhaustive Analysis**. Implemented "Comprehensive Monologue" instruction to force Gemini to brainstorm all hidden variables. Increased factor output to 15+ exhaustive situational criteria per goal for total completeness.
-- [2026-02-25] **v16: Strategic Multi-Perspective Engine**. Upgraded to **Gemini 1.5 Pro** for superior reasoning. Implemented categorical brainstorming (Financial, Emotional, Social, Technical, Environmental, Risk, Long-term) to ensure an exhaustive set of factors.
-- [2026-02-25] **v17: Hyper-Aggressive Factor Discovery**. Strictly enforced 20-25 exhaustive factors by requiring a minimum of 3 specific criteria per each of the 7 strategic domains. Focused on hidden expert-level variables.
-- [2026-02-25] **v18: Groq/Llama 3.3 70B Migration**. Switched AI provider from Gemini (quota-limited) to **Groq API** (14,400 free req/day). Uses `response_format: json_object` for guaranteed structured output. Factor count refined to 8-13. UI updated to remove equation display. Duplicate user-factor detection added.
+# RESEARCH_LOG.md
 
-## AI Prompts Used
-- "Generic MCDA (Multi-criteria decision analysis) in Javascript"
-- "Situational assessment model for decision support systems"
-- "How to weight impact factors by user relevance in scoring engines"
+## 1. Purpose of This Log
 
-## Prompt History (Refinement Phase)
+This document records the research done while developing the decision-making system. It includes:
 
-1. "actally i liked that how much you improved it, there are few things you need to change , 1. the qstn that you ask to the user is a little bit high standard, it should be in minimal terms. 2. it should identify all the factors and not only 4 factors. then the answer should telll the correct that the person needed, (the contnt in the answer should not be same, it have to be clear)"
-2. "i would like to clear something, it should not explain about the decision it selected, it should say why should i choose that, and the situational reasoning not needed"
-3. "i would like to make some changes: 1.whn you ask question to the user, there is no need to gtell the factor name in the question, just question needed. 2. i told you to simplify questions, but not need to make it small, it should be simple nut not too much small . 3. it is the most imporatnt thing, you should not tell about the question in the desicions, you have to explain the decisions, if you cant explain it, search with the help of ai, and explain every decisions"
-4. "This is the strongest candidate for your specific case because it aligns perfectly with your most critical priorities. Choosing this path ensures that your major requirements are met with high stability and precision, offering a superior balance compared to other choices. this is the 2nd para in the answer, it is present in all the threea nswer, no need for this"
-5. "there is few more changes i need to add, 1. the answer should be explained largly and every answer should tell in only simpler words, 2. the question that the chatbot ask should very simple, and every thing should be simply understandable english,3. update the reserach log and include every prompt that i gave to you"
-6. "I want to remove all generic names like 'Laptop Pro Elite'. Every recommendation should be a real, expert-grade model (e.g., MacBook Pro M3, Razer Blade)."
-7. "Expand every category to have at least 5-6 specific options so the user has more variety to choose from."
-8. "The descriptions for these expert options should be very detailed and technically accurate, but still in simple English."
-9. "i want to make a change, the factor that needed by the user should ask first, then only list the full factors including fctor from the user"
-10. "i mean, the user can enter different factors, enter with comma, the factors added by the user should list line by line and then remaining factirs list"
-11. "let me give my idea of the system, after generate the factors 1. Use Ai to generate a apted equation for that perticular case , 2. based on the value the user give through each 2-10 value, the it should calculate the value of the equation, 3. the important step is thi, collecting all the possible decisions, 4. calculate the value of the factors on the existing collected decisions, 5. analyse which value of the decisions closed to the value that got from user, 6. then show the result to user"
-12. "there is 2 type of error iam seeing now, 1. when i enter my factor, the ai should understand it, it should include to the question, the question should be relevent and correct. 2. the decicions are not correct, i just give a simple example, when i enter malappuram place as my priority, i should list the houses from there based on the calculated equation, (note that the equation should linear, the equationj should prinnt so that better understanding will got, also note that the comparison of the decisions based on the equation generated by the ai)"
-13. "just now i got an error, choosing a career got answer as chooosing a car, why is that, make sure that every AI working correctly"
-14. "ok do that, bcz the 25+ datas are not the methord i wanted, you have to find the factors seperately"
-15. "it only finding very few factors, it find all related factors"
-16. "still the same error, the llm not working correctly. find a different way to the correct work of ai to get factors"
-17. "it is working perfectly right now, a few changes i need to add, 1. the equation no need to show, 2. if my factor present in the AI fetched factor, do not repeat it"
-18. "only 8-13 factors needed, it should be in between"
+- All AI prompts used during development  
+- Web searches performed  
+- External ideas explored  
+- Decisions on what was accepted, rejected, or modified  
+- How the system evolved across Plan 1, Plan 2, and Plan 3  
 
-## What I Accepted
-- Weighted sum model driven by case-specific "Situations".
-- Dual-mapping (Situation -> Option Impact) for decentralized logic.
-- **Expert-Grade Realism**: Explicitly using real-world manufacturers/models over generic labels.
-- **Deep Search UX**: Simulated terminal logs to build trust in the "analysis" process.
-- **User-Defined Criteria**: Support for comma-separated user inputs that override/complement the AI knowledge base.
-- **Linear Scalar Engine**: Transitioning from relative scoring to absolute formula-based matching.
-- **Intent Boundary Verification**: Using regex to ensure linguistic collision-free analysis (fixing "Career/Car" bug).
-- **Dynamic Context Injection**: Injects specific real-world data (like Malappuram housing) when location keywords are detected.
-- **Generative AI Foundation**: Fully dynamic factor and option discovery via AI API, removing limits of hardcoded datasets.
-- **Groq/Llama Engine**: Switched to Groq (Llama 3.3 70B) for reliable, quota-free AI analysis.
-- **Duplicate Factor Detection**: User-defined factors are intelligently merged with AI factors, skipping overlaps.
-- **Clean UI**: Equation display removed. Factor list is simple, numbered, and clean.
+The development process was **iterative and exploratory**, and this log captures that evolution.
 
-## What I Rejected
-- Binary yes/no situations (kept 1-10 scale for nuance).
-- Global criteria (replaced with local scenarios per goal).
-- Generic "Refinement" logic (e.g., appending 'Pro Elite' to strings—deleted for better realism).
+---
+
+## 2. Plan 1 — Domain-Specific Prototype (Ankle Rehabilitation)
+
+### Research Focus
+
+At this stage, the goal was to **validate a weighted scoring system** in a single domain (ankle rehabilitation).  
+The focus was on **structured logic, clear scoring, and applying it to real rehabilitation exercises**, not generalization.
+
+The main goal was to help patients or therapists **compare different rehabilitation options** for ankle sprains based on important criteria.
+
+### Web Searches
+
+- "How to implement weighted scoring model"  
+- "Multi-criteria decision making methods"  
+- "Explainable decision support systems"  
+- "Ankle sprain rehabilitation exercises comparison"  
+- "Factors affecting recovery from ankle sprain"  
+- "existing medical recods of ankle sprain rehabilitation"
+- "importants of proper ankle sprain rehab for athlets"
+
+### AI Prompts Used 
+
+
+1. “Create a simple decision system website for ankle sprain rehab. The options are Rest, Home Exercise, Physiotherapy, and Accelerated Sports Rehab. The criteria are Recovery Speed, Risk, Cost, Supervision Level, and Long-Term Stability. The website should let users enter numeric weights for each criterion and then show the options ranked based on these weights.”
+2. “Improve the input form so it is easy to use, with clear numeric fields for weights and checkboxes or dropdowns for selecting the rehab options.”
+3. “Design a results section that clearly displays the ranked options along with a short explanation of why each option scored that way, in simple language.”
+4. “Explain step by step how to calculate a final weighted score for each rehab option using the criteria and weights”  
+5. “Suggest ways to check that the user inputs are valid, like numeric weights and no missing options, and show simple error messages for the website.”  
+6. “Suggest optional features that could make the website more helpful, like showing exercise images, progress tracking, or tips for preventing re-injury.”  
+
+
+### What I Accepted
+
+- Weighted Sum Model (Σ weight × performance)  
+- Deterministic scoring instead of predictive models  
+- Using a 1–10 scale for flexibility  
+- Including **realistic rehab exercises and routines** for each option  
+- Evaluation based on **Recovery Speed, Risk, Cost, Supervision Level, and Long-Term Stability**  
+
+### What I Rejected
+
+- Machine learning-based prediction models (not explainable enough)  
+- Binary yes/no evaluation (too rigid)  
+
+
+### Example Factors and Options
+
+**Options:**
+
+- **Rest** – Minimal activity, allows natural healing.  
+- **Home Exercise** – Simple mobility and strengthening exercises done at home.  
+- **Physiotherapy** – Supervised treatment with targeted exercises and manual therapy.  
+- **Accelerated Sports Rehab** – Intensive program for athletes to return quickly to sport.  
+
+**Criteria:**
+
+- **Recovery Speed** – How quickly the ankle regains normal function.  
+- **Risk** – Likelihood of re-injury or complications.  
+- **Cost** – Financial cost to the patient.  
+- **Supervision Level** – Amount of guidance required from professionals.  
+- **Long-Term Stability** – Effectiveness in preventing future ankle problems.  
+
+**Example Exercises (Home Exercise & Physiotherapy):**
+
+- **Ankle Circles** – Improve mobility.  
+- **Towel Scrunches** – Strengthen foot muscles.  
+- **Heel Raises** – Improve calf and ankle strength.  
+- **Resistance Band Work** – Strengthen ankle ligaments.  
+- **Balance Exercises** – Improve stability and proprioception.  
+
+---
+
+## 3. Plan 2 — Making It General Using AI
+
+### Research Focus
+
+After validating the core logic in Plan 1, the goal was to **generalize the system** to handle any decision topic.  
+The main idea was to **modify Plan 1** so AI could help suggest criteria and options dynamically, while keeping the deterministic ranking engine unchanged.
+
+
+### AI Prompts Used (Plan 2 — Generalized System)
+
+1. “I want to use the decision system we built for ankle sprain rehab for any topic. Use AI to suggest relevant criteria or factors that should be considered for this decision, explain why each factor is important, and provide examples in simple language so users can understand.”  
+2. “Allow the user to add or adjust factors. Give extra weight to any factors that needs more weight, and ensure the system calculates scores using the weighted sum method (WSM).”  
+3. “Search for realistic, real-world options for this decision. Include 5–6 practical examples for each category, and apply the WSM to each option using the criteria and weights. Rank the options based on the calculated scores.”  
+4. “Explain clearly in simple language why each option received its ranking, so users understand the reasoning behind the results. Avoid generic sentences and show practical examples wherever possible.”  
+5. “Simplify the user interface and input process. Make it easy for users to enter weights, add or modify factors, and see ranked results. ”  
+6. “Check user inputs for errors, like non-numeric weights or missing options, and provide clear, simple error messages to prevent calculation issues.”
+
+
+### Experimental Features During Plan 2
+
+- **25+ industry knowledge base (hardcoded):** A set of predefined industry information to help AI suggest realistic options.  
+- **20–25 factor exhaustive modeling:** Listing many factors per decision to ensure completeness of evaluation.  
+- **Step-by-step AI reasoning enforcement:** Prompting AI to reason logically before suggesting factors or options.  
+- **Linear equation auto-generation per case:** Automatically creating equations to calculate option scores using weights.  
+- **Equation display in UI:** Showing the scoring equations on the interface for transparency.  
+- **AI-calculated factor weights:** Letting AI suggest weights for criteria as a reference for users.  
+- **Simulated “Deep Search” terminal-style UX:** A visual interface simulating detailed step-by-step exploration of options.  
+
+### Bugs & Corrections
+
+- "Career" was misinterpreted as "Car" → fixed using regex word-boundary matching.  
+- Duplicate user-entered factors → implemented duplicate detection.  
+- Too many factors reduced usability → limited list to 8–13 factors.  
+- Equation display confused users → removed it from the UI for clarity.  
+
+### What I Accepted
+
+- Dynamic factor discovery via AI  
+- User-defined criteria (comma-separated input)  
+- Structured JSON outputs from AI  
+- Clear separation between AI generation and deterministic ranking engine  
+
+### What I Rejected
+
+- Fully AI-driven scoring (kept deterministic engine)  
+- 20–25 factor requirement (too heavy for user experience)  
+- Hardcoded industry dataset  
+- Raw multipliers causing dominance distortion  
+- Overly complex explanation formats  
+
+---
+
+## 4. Plan 3 — Refocusing on Structured Logic (Final Plan)
+
+### Research Focus
+
+After experimenting with AI-driven discovery, I realized the assignment’s main goal is **structured evaluation of known options**.  
+The system should **help users structure decisions mathematically and transparently**, not explore unknown goals.
+
+### Adjustments Made
+
+- Removed AI dependency from core ranking  
+- Restored deterministic scoring as the central engine  
+- Normalized weights to ensure bounded outputs  
+- Removed external multipliers  
+- Reduced complexity for clarity  
+
+### AI Prompt Evolution (Final Phase)
+
+1. “Remove AI-driven criteria and option discovery. The user will provide all criteria and options, and the system should use only these inputs for scoring. Also, remove the equation display from the UI.”
+2. “Ask the user to enter weights for each criterion. Then calculate the scores for each option using these weights and rank the options accordingly.”
+3. “Score each option using a simple scale, for example 2, 4, 6, 8, 10, so it is easy for the user to understand. Use a table for that with options and criterias in rows and colums”
+4. “Do not use any external multipliers, like ‘Trust’ or intuition factors. All scoring should be based purely on user-provided weights.”
+5. “Normalize all criterion weights so that the total adds up to 1. This ensures that each option’s score is proportional, consistent, and comparable across all options.”
+6. “Show the final ranking and scores clearly, with accurate numeric values, and provide a simple explanation of why each option received its score.”
+
+
+
+### What I Accepted
+
+- Deterministic MCDA engine  
+- Weight normalization for stability  
+- Clear separation of layers (UI, Decision Engine, AI support)  
+- Structured and explainable ranking logic  
+
+### What I Rejected
+
+- Full AI-driven criteria and option discovery for core logic  
+- Any external multipliers (e.g., “Trust” factor)  
+
+---
+
+## 5. Summary of Evolution
+
+| Stage  | What Changed | Why |
+|--------|-------------|------|
+| Plan 1 | Fixed domain system | Establish core logic |
+| Plan 2 | AI-generated criteria & options | Increase flexibility |
+| Plan 3 | Known criteria & options + normalized MCDA | Improve clarity and alignment |
+
+The biggest shift was **conceptual**:  
+From: *“Helping users discover what to consider”*  
+To: *“Helping users structure what they already want to evaluate”*
+
+---
+
+## 6. Reflection on Research Process
+
+The research process was **iterative and experimental**.  
+
+I explored:  
+
+- Domain restriction  
+- AI-driven generalization  
+- Hybrid experiments (multipliers, discovery features)  
+
+Key lessons:
+
+- Deterministic structure provides stability  
+- AI should assist, not dominate  
+- Simplicity improves clarity  
+- Alignment with assignment requirements is more important than adding extra features  
+
+- **Prompts evolved over time:** I refined the AI prompts iteratively, starting with simple domain-specific prompts in Plan 1, then generalizing them in Plan 2, and finally focusing on clarity and deterministic logic in Plan 3. This shows how prompt design influenced system behavior and usability.
