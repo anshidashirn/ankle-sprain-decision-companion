@@ -86,8 +86,6 @@ To better understand the system's structure and data flow, please refer to the f
   I chose WSM because it is transparent, easy to explain, and aligns closely with how people naturally reason:  
   > “This factor matters this much, and this option performs this well.”
 
-  While it makes simplifying assumptions (such as linear utility), it provides a strong balance between mathematical structure and practical usability.
-
 The decision to use WSM was not about choosing the most advanced model, but the most appropriate one for clarity, scalability, and explainability.
 
 ---
@@ -160,20 +158,16 @@ This normalization process prevents:
 
 ---
 
-### 3. Handling Human Ambiguity & Bias
+### 3. Handling Bias & Stability
 
-Even structured decision systems are influenced by human judgment. The system includes basic safeguards to make users more aware of their own biases.
+Even structured systems depend on human input. To improve reliability, the system includes:
 
 - **Sensitivity Analysis**  
-  The system calculates how much a criterion’s weight would need to change to alter the top-ranked option.  
-  This helps answer the question:  
-  *“How stable is this result?”*  
+  Shows how much a weight must change to affect the ranking.  
+  If small changes flip results, the decision is sensitive.
 
-  If a small weight change flips the ranking, the decision may not be robust.
-
-- **Discrete Scoring Scale**  
-  The system uses an even-numbered scale (2, 4, 6, 8, 10) instead of including a neutral middle value.  
-  This reduces the tendency to default to a “safe” average score and encourages clearer judgments.
+- **Discrete Scoring Scale (2–10)**  
+  Avoids a neutral middle value and encourages clearer evaluation.
 
 ---
 
@@ -218,9 +212,9 @@ Total Weight = 24
 
 #### Step 3: Normalize Weights
 
-\[
+$$
 NormalizedWeight_i = \frac{w_i}{\sum w}
-\]
+$$
 
 | Criterion            | Raw Weight | Normalized |
 |----------------------|------------|------------|
@@ -254,9 +248,9 @@ NormalizedWeight_i = \frac{w_i}{\sum w}
 
 #### Step 6: Final Score Calculation
 
-\[
+$$
 FinalScore = \sum (NormalizedWeight \times NormalizedScore)
-\]
+$$
 
 ##### Option A
 
@@ -307,6 +301,85 @@ This indicates the decision is somewhat sensitive to how much long-term growth i
 *   **Extreme Weighting**: Normalization ensures that even large differences in weights (e.g., 10 vs 2) do not break the bounded [0,1] score range or distort calculations.
 
 ---
+
+## Testing Strategy
+
+The decision engine is designed to be easy to test.
+
+Because it is:
+- Deterministic (same input → same output)
+- Based on pure functions
+- Independent from React
+
+This makes unit testing straightforward.
+
+---
+
+### What Should Be Tested
+
+The following parts of the system can be tested independently:
+
+- Weight normalization (weights should always sum to 1)
+- Score normalization (scores should be scaled correctly)
+- Final score calculation
+- Ranking logic (higher score ranks first)
+- Tie handling
+- Sensitivity calculation
+- Edge cases (zero weights, empty options, single criterion)
+
+---
+
+### Example Test Case
+
+**Input:**
+- 2 options
+- 1 criterion
+- Equal weights
+
+**Expected Result:**
+- The option with the higher score ranks first
+- The normalized weights sum to 1
+
+---
+
+### How to Run Tests
+
+If using Vitest:
+
+```bash
+npm install -D vitest
+npm run test
+```
+
+---
+## Future Improvements
+
+With more time, the project could be improved in the following ways:
+
+### Testing & Quality
+- Add full automated unit test coverage  
+- Add edge case stress testing  
+- Set up Continuous Integration (CI) for automatic test runs  
+- Track code coverage  
+
+### Decision Model Enhancements
+- Support cost-type criteria (where lower values are better)  
+- Add alternative decision methods (e.g., AHP, TOPSIS)  
+- Add basic uncertainty or risk modeling  
+
+### User Experience
+- Save decisions using localStorage or a backend  
+- Export results to CSV or PDF  
+- Add simple data visualizations (charts)  
+- Compare multiple decision scenarios  
+
+### Architecture Improvements
+- Convert the engine into a reusable npm package  
+- Add TypeScript for better type safety  
+- Improve performance for larger datasets  
+
+These improvements would make the system more robust, scalable, and production-ready.
+
 
 ### Getting Started
 1. `npm install`
