@@ -104,14 +104,15 @@ $$
 $$
 
 Where:
-- \( w_i \) = raw weight assigned to criterion \( i \)
-- \( n \) = total number of criteria
+
+- $w_i$ = raw weight assigned to criterion $i$
+- $n$ = total number of criteria
 
 This ensures:
 
-\[
-\sum NormalizedWeight = 1
-\]
+$$
+\sum_{i=1}^{n} \text{NormalizedWeight}_i = 1
+$$
 
 So decisions are based on **relative importance**, not raw numbers.
 
@@ -124,9 +125,9 @@ Performance scores are scaled to a 0–1 range to keep everything on the same sc
 $$
 \text{NormalizedScore}_{ij} = \frac{r_{ij}}{10}
 $$
-
 Where:
-- \( r_{ij} \) = raw score of option \( i \) on criterion \( j \)
+
+- $r_{ij}$ = raw score of option $i$ on criterion $j$
 
 This guarantees consistent comparison across all criteria.
 
@@ -144,7 +145,8 @@ $$
 $$
 
 Where:
-- \( m \) = total number of criteria
+
+- $m$ = total number of criteria
 
 The result is a value between **0 and 1**, representing how well the option aligns with the user's priorities.
 
