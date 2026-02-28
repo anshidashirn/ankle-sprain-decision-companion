@@ -45,7 +45,8 @@ The system follows a clear and repeatable decision process:
 
 ---
 
-### Data Model
+## Data Model
+
 The system operates on three core entities:
 
 *   **Option**: `{ id: string, name: string, description: string }`
@@ -59,7 +60,7 @@ The calculation runs in **O(n × m)** time, where:
 
 ---
 
-### Visual Architecture & Design
+## Visual Architecture & Design
 
 To better understand the system's structure and data flow, please refer to the following design diagrams:
 
@@ -77,9 +78,9 @@ To better understand the system's structure and data flow, please refer to the f
 
 ---
 
-### Architectural Rationale (The "Why")
+## Architectural Rationale (The "Why")
 
-#### 1. Why Weighted Sum Model (WSM)?
+### 1. Why Weighted Sum Model (WSM)?
 
 - **Weighted Sum Model (Chosen)**  
   I chose WSM because it is transparent, easy to explain, and aligns closely with how people naturally reason:  
@@ -89,11 +90,11 @@ To better understand the system's structure and data flow, please refer to the f
 
 The decision to use WSM was not about choosing the most advanced model, but the most appropriate one for clarity, scalability, and explainability.
 
-#### 2. Normalization (Keeping the Math Fair)
+---
+
+### 2. Normalization (Keeping the Math Fair)
 
 To ensure results are balanced and not distorted by large numbers, the system normalizes all inputs before calculating the final score.
-
----
 
 1. **Weight Normalization**
 
@@ -116,24 +117,25 @@ $$
 
 So decisions are based on **relative importance**, not raw numbers.
 
----
 
-2 **Score Scaling**
+
+2. **Score Scaling**
 
 Performance scores are scaled to a 0–1 range to keep everything on the same scale:
 
 $$
 \text{NormalizedScore}_{ij} = \frac{r_{ij}}{10}
 $$
+
 Where:
 
 - $r_{ij}$ = raw score of option $i$ on criterion $j$
 
 This guarantees consistent comparison across all criteria.
 
----
 
-3 **Final Calculation**
+
+3. **Final Calculation**
 
 The final score for each option is calculated as:
 
@@ -150,15 +152,15 @@ Where:
 
 The result is a value between **0 and 1**, representing how well the option aligns with the user's priorities.
 
----
-
 This normalization process prevents:
 
 - Score inflation  
 - One criterion dominating unfairly  
-- Scale inconsistencies  
+- Scale inconsistencies
 
-#### 3. Handling Human Ambiguity & Bias
+---
+
+### 3. Handling Human Ambiguity & Bias
 
 Even structured decision systems are influenced by human judgment. The system includes basic safeguards to make users more aware of their own biases.
 
@@ -173,7 +175,9 @@ Even structured decision systems are influenced by human judgment. The system in
   The system uses an even-numbered scale (2, 4, 6, 8, 10) instead of including a neutral middle value.  
   This reduces the tendency to default to a “safe” average score and encourages clearer judgments.
 
-#### 4. Limitations & Intellectual Honesty
+---
+
+### 4. Limitations & Intellectual Honesty
 
 No decision model is perfect. This system makes simplifying assumptions to stay transparent and easy to use.
 - **Linear Assumption**  
@@ -182,6 +186,7 @@ No decision model is perfect. This system makes simplifying assumptions to stay 
   The system assumes each criterion measures something different. If criteria overlap, the model may unintentionally double-count similar factors.
 - **Deterministic Model**  
   The system works with fixed inputs and produces fixed outputs. It does not account for uncertainty, risk, or probability in real-world outcomes.
+  
 ---
 
 ### Complete Example
