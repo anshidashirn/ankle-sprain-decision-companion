@@ -99,9 +99,9 @@ To ensure results are balanced and not distorted by large numbers, the system no
 
 User-defined importance values are converted into proportions so that all weights sum to 1.
 
-\[
+$$
 \text{NormalizedWeight}_i = \frac{w_i}{\sum_{j=1}^{n} w_j}
-\]
+$$
 
 Where:
 - \( w_i \) = raw weight assigned to criterion \( i \)
@@ -121,9 +121,9 @@ So decisions are based on **relative importance**, not raw numbers.
 
 Performance scores are scaled to a 0–1 range to keep everything on the same scale:
 
-\[
-NormalizedScore_{ij} = \frac{r_{ij}}{10}
-\]
+$$
+\text{NormalizedScore}_{ij} = \frac{r_{ij}}{10}
+$$
 
 Where:
 - \( r_{ij} \) = raw score of option \( i \) on criterion \( j \)
@@ -136,9 +136,12 @@ This guarantees consistent comparison across all criteria.
 
 The final score for each option is calculated as:
 
-\[
-FinalScore_i = \sum_{j=1}^{m} (NormalizedWeight_j \times NormalizedScore_{ij})
-\]
+$$
+\text{FinalScore}_i = \sum_{j=1}^{m}
+\left(
+\text{NormalizedWeight}_j \times \text{NormalizedScore}_{ij}
+\right)
+$$
 
 Where:
 - \( m \) = total number of criteria

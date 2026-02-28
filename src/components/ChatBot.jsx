@@ -31,6 +31,18 @@ const ChatBot = () => {
         setMessages(prev => [...prev, { role, text }]);
     };
 
+    const renderTextWithBadges = (text) => {
+        if (!text) return null;
+        const parts = text.split(/(\*\*.*?\*\*)/g);
+        return parts.map((part, i) => {
+            if (part.startsWith('**') && part.endsWith('**')) {
+                const content = part.slice(2, -2);
+                return <span key={i} className="badge badge-primary">{content}</span>;
+            }
+            return part;
+        });
+    };
+
     const handleGoalSubmit = (e) => {
         e.preventDefault();
         if (!userInput.trim()) return;
@@ -279,7 +291,7 @@ Now, let's determine the relative importance of each factor to create your perso
                                 lineHeight: '1.6',
                                 whiteSpace: 'pre-line'
                             }}>
-                                {m.text}
+                                {renderTextWithBadges(m.text)}
                             </div>
                         </div>
                     ))}
@@ -314,7 +326,7 @@ Now, let's determine the relative importance of each factor to create your perso
                                 }}>
                                     <span style={{ fontSize: '1.2rem' }}>⚖️</span>
                                     <span>
-                                        **Sensitivity Insight**: If you increased the importance of **{results.sensitivity.factor}** by just **{results.sensitivity.requiredDelta}%**, the top recommendation would flip.
+                                        {renderTextWithBadges(`**Sensitivity Insight**: If you increased the importance of **${results.sensitivity.factor}** by just **${results.sensitivity.requiredDelta}%**, the top recommendation would flip.`)}
                                     </span>
                                 </div>
                             )}
@@ -336,7 +348,7 @@ Now, let's determine the relative importance of each factor to create your perso
                                         <div style={{ background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '12px', marginBottom: '1rem' }}>
                                             <div style={{ fontSize: '0.85rem', color: 'white', fontWeight: '500' }}>Executive Reasoning:</div>
                                             <div style={{ fontSize: '0.85rem', color: 'var(--text-dim)', marginTop: '0.4rem', fontStyle: 'italic' }}>
-                                                {res.reasoning}
+                                                {renderTextWithBadges(res.reasoning)}
                                             </div>
                                         </div>
 

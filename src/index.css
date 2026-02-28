@@ -95,21 +95,21 @@ button {
 }
 
 .badge {
-  padding: 0.25rem 0.75rem;
-  border-radius: 999px;
-  font-size: 0.8rem;
+  display: inline-block;
+  padding: 0.1rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
   font-weight: 700;
-  text-transform: uppercase;
-}
-
-.badge-success {
-  background: rgba(0, 230, 118, 0.2);
-  color: var(--success);
+  letter-spacing: 0.02em;
+  margin: 0 2px;
+  vertical-align: baseline;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .badge-primary {
-  background: var(--primary-glow);
-  color: var(--primary);
+  background: rgba(255, 107, 0, 0.15);
+  color: #ff8c33;
+  border-color: rgba(255, 107, 0, 0.3);
 }
 
 @keyframes fadeIn {
