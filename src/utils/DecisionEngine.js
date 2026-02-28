@@ -5,9 +5,8 @@
  * 3. Narrative Explanation Generation
  */
 
-export const evaluateOptions = (options, criteria, criteriaImportance, optionWeights = {}) => {
+export const evaluateOptions = (options, criteria, criteriaImportance) => {
     // 1. Prepare Weights & Normalize (Scaling sum to 1.0)
-    // We treat "Initial Trust/Intuition" as its own specific weighted criterion to prevent dominance
     const weightMap = {};
     let totalRawWeight = 0;
 
@@ -18,17 +17,11 @@ export const evaluateOptions = (options, criteria, criteriaImportance, optionWei
         totalRawWeight += val;
     });
 
-    // Add Intuition as a balanced criterion (Weight matches average criterion importance)
-    const avgCritWeight = totalRawWeight / criteria.length;
-    const intuitionWeight = avgCritWeight;
-    totalRawWeight += intuitionWeight;
-
     // Final Normalization: Vector of weights w where Σw = 1
     const normalizedWeights = {};
     Object.keys(weightMap).forEach(id => {
         normalizedWeights[id] = weightMap[id] / totalRawWeight;
     });
-    const normalizedIntuitionWeight = intuitionWeight / totalRawWeight;
 
     // 2. Evaluate Options (Scaled 0.0 - 1.0)
     const evaluated = options.map(option => {
@@ -49,18 +42,6 @@ export const evaluateOptions = (options, criteria, criteriaImportance, optionWei
                 performance: performance.toFixed(2),
                 contribution: contribution
             });
-        });
-
-        // Intuition/Trust Performance
-        const intuitionPerformance = (parseFloat(optionWeights[option.id] || 5)) / 10;
-        const intuitionContribution = normalizedIntuitionWeight * intuitionPerformance;
-        weightedSum += intuitionContribution;
-        breakdown.push({
-            id: 'intuition',
-            name: 'Initial Trust',
-            weight: normalizedIntuitionWeight.toFixed(3),
-            performance: intuitionPerformance.toFixed(2),
-            contribution: intuitionContribution
         });
 
         return {

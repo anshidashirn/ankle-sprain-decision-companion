@@ -1,116 +1,308 @@
-# Decision Companion System v2.0
+# Decision Companion System
 
 A deterministic multi-criteria decision analysis (MCDA) framework. This system uses a **Transparent Weighted Sum Model (WSM)** to rank options based on user-defined parameters.
 
 ---
 
-### 📝 Problem Statement
+### Problem Statement
 Real-world decisions often involve multiple competing criteria with different levels of importance. Humans tend to rely on intuition, which introduces bias and inconsistency. 
 
 The goal of this system is to provide a **transparent, structured, and mathematically grounded framework** that helps users evaluate options objectively while still incorporating subjective priorities.
 
 ---
 
-### 📋 Assumptions
-*   **Cardinal Scoring**: Users can meaningfully score options on a fixed discrete scale (2, 4, 6, 8, 10).
-*   **Independence of Irrelevant Alternatives (IIA)**: Criteria are assumed to be independent (no overlap).
-*   **Linear Utility**: Utility is assumed to be linear within the scoring range.
-*   **Explicit Trade-offs**: Users are willing to make explicit trade-offs between competing factors.
-*   **Finite Option Set**: All options are known upfront (no dynamic discovery).
+## Assumptions
+
+- **Users can score consistently**  
+  We assume users can rate each option on a simple fixed scale (2, 4, 6, 8, 10) in a way that reflects how they truly feel.
+- **Criteria don’t overlap**  
+  We assume each criterion measures something different (for example, “Salary” and “Work-Life Balance” are treated as separate and not double-counting the same thing).
+- **Scores increase evenly**  
+  We assume the difference between 6 and 8 is the same “improvement” as between 8 and 10. In other words, higher numbers always mean proportionally better outcomes.
+- **Users are willing to prioritize**  
+  We assume users are comfortable saying that one factor matters more than another.
+- **All options are known**  
+  We assume the user already knows the full set of options they want to compare. The system does not discover new options automatically.
+---
+
+## Structured Workflow
+
+The system follows a clear and repeatable decision process:
+
+1. **Define the Goal**  
+   Clearly state what decision you are trying to make.
+2. **Set Up the Structure**  
+   - **Options**: List the choices you want to compare.  
+   - **Criteria**: List the factors that matter for this decision.
+3. **Initialize the Model**  
+   The system prepares the calculation framework based on the options and criteria provided.
+4. **Assign Importance**  
+   - **Criteria Weights**: Indicate how important each factor is.  
+5. **Fill the Decision Matrix**  
+   Score how well each option performs against each criterion.
+6. **Calculate and Rank**  
+   The system normalizes all inputs, calculates weighted scores, ranks the options, and provides sensitivity insights.
 
 ---
 
-### 🛡️ Structured Workflow
-The system enforces a reproducible decision architecture:
-
-1.  **Goal Definition**: Clearly state the analysis target.
-2.  **Structural Setup**:
-    -   **Options**: Define the set of candidates.
-    -   **Criteria**: Define the independent factors for evaluation.
-3.  **Framework Initialization**: The system initializes the mathematical model tailored to the specific variables.
-4.  **Dual-Weighting Phase**:
-    -   **Criteria Weights**: Assign importance to each criterion.
-    -   **Intuition Weight**: Assign a baseline preference (Initial Trust) to each option. This is treated as a **Normalized Intuition Criterion** within the model to ensure mathematical consistency.
-5.  **Interactive Decision Matrix**: Manual input of performance scores for the Option-Criterion matrix.
-6.  **Mathematical Evaluation**: The engine applies vector-normalized calculation and produces ranked results with sensitivity analysis.
-
----
-
-### 💾 Data Model
+### Data Model
 The system operates on three core entities:
 
 *   **Option**: `{ id: string, name: string, description: string }`
 *   **Criterion**: `{ id: string, label: string, question: string, weights: { [optId: string]: number } }`
 *   **DecisionMatrix**: A collection of normalized `Option` and `Criterion` weights used for calculation.
 
-**Computational Complexity**: $O(n \times m)$ where $n = \text{Options}$ and $m = \text{Criteria}$.
+**Computational Complexity**  
+The calculation runs in **O(n × m)** time, where:
+- `n` = number of options  
+- `m` = number of criteria  
 
 ---
 
-### 🧠 Architectural Rationale (The "Why")
+### Architectural Rationale (The "Why")
 
 #### 1. Why Weighted Sum Model (WSM)?
-We explicitly evaluated three primary MCDA frameworks before selection:
-*   **AHP (Analytic Hierarchy Process)**: Rejected due to **Pairwise Complexity**. Requiring $n(n-1)/2$ comparisons for every criterion and option creates massive cognitive overhead.
-*   **TOPSIS**: Rejected due to **Interpretability Gap**. While mathematically elegant, "Distance from the ideal" is difficult for a human user to intuitively verify.
-*   **WSM (Chosen)**: Selected for its **Scalability and Transparency**. It maps directly to deterministic logic: importance multiplied by performance.
 
-#### 2. Mathematical Rigor: Vector Normalization
-To prevent score inflation and weight dominance, we implement a multi-stage normalization pipeline:
+- **Weighted Sum Model (Chosen)**  
+  I chose WSM because it is transparent, easy to explain, and aligns closely with how people naturally reason:  
+  > “This factor matters this much, and this option performs this well.”
 
-1.  **Weight Normalization**: User weights $w_i \in [2,10]$ are converted into a probability vector:
-    $$NormalizedW_i = \frac{w_i}{\sum_{j=1}^{n} w_j}$$
-    *This ensures $\sum NormalizedW = 1.0$.*
+  While it makes simplifying assumptions (such as linear utility), it provides a strong balance between mathematical structure and practical usability.
 
-2.  **Score Scaling**: Raw scores $r_{ij} \in [2,10]$ are scaled to a deterministic [0,1] range:
-    $$NormalizedR_{ij} = \frac{r_{ij}}{10}$$
+The decision to use WSM was not about choosing the most advanced model, but the most appropriate one for clarity, scalability, and explainability.
 
-3.  **Final Evaluation**:
-    $$FinalScore = \sum (NormalizedW \times NormalizedR)$$
+#### 2. Normalization (Keeping the Math Fair)
+
+To ensure results are balanced and not distorted by large numbers, the system normalizes all inputs before calculating the final score.
+
+---
+
+1. **Weight Normalization**
+
+User-defined importance values are converted into proportions so that all weights sum to 1.
+
+\[
+NormalizedWeight_i = \frac{w_i}{\sum_{j=1}^{n} w_j}
+\]
+
+Where:
+- \( w_i \) = raw weight assigned to criterion \( i \)
+- \( n \) = total number of criteria
+
+This ensures:
+
+\[
+\sum NormalizedWeight = 1
+\]
+
+So decisions are based on **relative importance**, not raw numbers.
+
+---
+
+2 **Score Scaling**
+
+Performance scores are scaled to a 0–1 range to keep everything on the same scale:
+
+\[
+NormalizedScore_{ij} = \frac{r_{ij}}{10}
+\]
+
+Where:
+- \( r_{ij} \) = raw score of option \( i \) on criterion \( j \)
+
+This guarantees consistent comparison across all criteria.
+
+---
+
+3 **Final Calculation**
+
+The final score for each option is calculated as:
+
+\[
+FinalScore_i = \sum_{j=1}^{m} (NormalizedWeight_j \times NormalizedScore_{ij})
+\]
+
+Where:
+- \( m \) = total number of criteria
+
+The result is a value between **0 and 1**, representing how well the option aligns with the user's priorities.
+
+---
+
+This normalization process prevents:
+
+- Score inflation  
+- One criterion dominating unfairly  
+- Scale inconsistencies  
 
 #### 3. Handling Human Ambiguity & Bias
-*   **Sensitivity Analysis Engine**: The system identifies **Rank-Flip Triggers**—calculating the exact delta required to swap the Top 2 recommendations. This surfaces subconscious biases in weighting.
-*   **Discrete Scaling**: Using an even scale (2,4,6,8,10) eliminates "Middle Bias" (the neutral 5), forcing definitive judgments.
+
+Even structured decision systems are influenced by human judgment. The system includes basic safeguards to make users more aware of their own biases.
+
+- **Sensitivity Analysis**  
+  The system calculates how much a criterion’s weight would need to change to alter the top-ranked option.  
+  This helps answer the question:  
+  *“How stable is this result?”*  
+
+  If a small weight change flips the ranking, the decision may not be robust.
+
+- **Discrete Scoring Scale**  
+  The system uses an even-numbered scale (2, 4, 6, 8, 10) instead of including a neutral middle value.  
+  This reduces the tendency to default to a “safe” average score and encourages clearer judgments.
 
 #### 4. Limitations & Intellectual Honesty
-*   **Linear Assumption**: Does not account for diminishing returns curve.
-*   **Independence**: Susceptible to double-counting if criteria overlap.
-*   **Deterministic**: Does not utilize probabilistic uncertainty modeling.
+
+No decision model is perfect. This system makes simplifying assumptions to stay transparent and easy to use.
+- **Linear Assumption**  
+  The model assumes that higher scores always increase value at a constant rate. In reality, some factors (like salary) may have diminishing returns after a certain point.
+- **Criteria Independence**  
+  The system assumes each criterion measures something different. If criteria overlap, the model may unintentionally double-count similar factors.
+- **Deterministic Model**  
+  The system works with fixed inputs and produces fixed outputs. It does not account for uncertainty, risk, or probability in real-world outcomes.
+---
+
+### Complete Example
+
+**Decision Goal**
+Choosing between three job offers.
 
 ---
 
-### 🔦 Example Output
-1. **Option A** — 0.78
-2. **Option B** — 0.64
-3. **Option C** — 0.52
+#### Step 1: Define Options
 
-**Executive Reasoning:**
-- **Primary Driver**: Salary (34% contribution to final score).
-- **Secondary Factor**: Growth Potential (28% contribution).
-
-**Sensitivity Insight**: If "Salary" weight were reduced by 12%, **Option B** would flip to rank #1.
+- **Option A** — Startup Company  
+- **Option B** — Mid-size Company  
+- **Option C** — Large Enterprise  
 
 ---
 
-### ⚠️ Edge Cases Considered
-*   **Equal Weighting**: Prevents division by zero; defaults to equal distribution.
-*   **Tied Results**: Handled via relative fractional match percentages.
-*   **Extreme Weighting**: Vector normalization ensures a weight of 10 vs 2 doesn't "break" the bounded [0,1] score range.
+#### Step 2: Define Criteria & Weights
+
+| Criterion            | Weight (2–10) |
+|----------------------|---------------|
+| Salary               | 10            |
+| Work-Life Balance    | 6             |
+| Growth Potential     | 8             |
+
+Total Weight = 24
 
 ---
 
-### 🚀 Getting Started
+#### Step 3: Normalize Weights
+
+\[
+NormalizedWeight_i = \frac{w_i}{\sum w}
+\]
+
+| Criterion            | Raw Weight | Normalized |
+|----------------------|------------|------------|
+| Salary               | 10         | 0.42       |
+| Work-Life Balance    | 6          | 0.25       |
+| Growth Potential     | 8          | 0.33       |
+
+(Sum = 1.0)
+
+---
+
+#### Step 4: Score Each Option (2–10 Scale)
+
+| Option   | Salary | Work-Life | Growth |
+|----------|--------|----------|--------|
+| A        | 8      | 4        | 10     |
+| B        | 7      | 8        | 7      |
+| C        | 9      | 6        | 6      |
+
+---
+
+#### Step 5: Normalize Scores (Divide by 10)
+
+| Option   | Salary | Work-Life | Growth |
+|----------|--------|----------|--------|
+| A        | 0.8    | 0.4      | 1.0    |
+| B        | 0.7    | 0.8      | 0.7    |
+| C        | 0.9    | 0.6      | 0.6    |
+
+---
+
+#### Step 6: Final Score Calculation
+
+\[
+FinalScore = \sum (NormalizedWeight \times NormalizedScore)
+\]
+
+##### Option A
+
+\[
+(0.42 × 0.8) + (0.25 × 0.4) + (0.33 × 1.0) = 0.77
+\]
+
+##### Option B
+
+\[
+(0.42 × 0.7) + (0.25 × 0.8) + (0.33 × 0.7) = 0.73
+\]
+
+##### Option C
+
+\[
+(0.42 × 0.9) + (0.25 × 0.6) + (0.33 × 0.6) = 0.73
+\]
+
+---
+
+#### Final Ranking
+
+1. **Option A** — 0.77  
+2. **Option B** — 0.73  
+3. **Option C** — 0.73  
+
+---
+
+#### Interpretation
+
+- **Option A** ranks first because it performs extremely well on **Growth Potential**, which has high importance.
+- **Option B** performs strongly on **Work-Life Balance**, but that criterion has lower overall weight.
+- **Option C** benefits from high Salary, but weaker performance in Growth reduces its total.
+
+---
+
+#### Sensitivity Insight
+
+If the weight of **Growth Potential** were reduced slightly (for example from 8 to 6), Option B would likely become the top recommendation.
+
+This indicates the decision is somewhat sensitive to how much long-term growth is valued.
+---
+
+### Edge Cases Considered
+*   **Equal Weighting**: If all criteria are given the same weight, the system automatically distributes importance evenly and avoids division errors.
+*   **Tied Results**: If two options receive the same final score, the system compares their fractional contributions to show relative alignment.
+*   **Extreme Weighting**: Normalization ensures that even large differences in weights (e.g., 10 vs 2) do not break the bounded [0,1] score range or distort calculations.
+
+---
+
+### Getting Started
 1. `npm install`
 2. `npm run dev`
 3. Access: `http://localhost:5173`
 
 ---
 
-### 🛠️ Tech Stack
-*   **Framework**: React 19 + Vite 7
-*   **Logic Engine**: Vanilla JavaScript (Deterministic MCDA)
-*   **Styling**: Modern CSS (Glassmorphism)
+### Tech Stack
 
+*   **Framework: React 19 + Vite 7**  
+    I chose React because this project requires dynamic state updates (weights, matrix values, recalculations, sensitivity analysis) that benefit from a component-based architecture.  
+    While a CLI or simpler HTML/JS approach would have worked, React makes the UI logic predictable and easier to scale if the system grows.  
+
+    Vite was selected over heavier build tools because it provides fast iteration with minimal configuration. The goal was to keep tooling lightweight and focus on the decision engine itself.
+
+*   **Logic Engine: Vanilla JavaScript (Deterministic MCDA)**  
+    The core calculation engine is intentionally written in plain JavaScript instead of relying on external math libraries.  
+    This keeps the logic transparent, easy to audit, and framework-independent.  
+    Since the model is mathematically simple (O(n × m)), additional abstraction layers were unnecessary.
+
+*   **Styling: Modern CSS (Glassmorphism)**  
+    I avoided UI frameworks (e.g., Tailwind, Material UI) to reduce dependency overhead and maintain full control over layout and clarity.  
+    The styling is intentionally minimal so that visual design does not distract from the structured decision process.
 ---
 
 *Moving decision making from gut feeling to architectural clarity.*

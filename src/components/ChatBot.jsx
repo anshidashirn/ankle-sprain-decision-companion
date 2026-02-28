@@ -13,9 +13,7 @@ const ChatBot = () => {
     const [decisionData, setDecisionData] = useState({ criteria: [], options: [] });
     const [criteriaIndex, setCriteriaIndex] = useState(0);
     const [userWeights, setUserWeights] = useState({});
-    const [optionWeights, setOptionWeights] = useState({});
     const [manualScores, setManualScores] = useState({}); // { critId: { optId: score } }
-    const [optionIndex, setOptionIndex] = useState(0);
     const [results, setResults] = useState(null);
     const [analysisLogs, setAnalysisLogs] = useState([]);
     const [isProcessing, setIsProcessing] = useState(false);
@@ -110,8 +108,8 @@ Now, let's determine the relative importance of each factor to create your perso
             const crit = decisionData.criteria[index];
             addMessage('bot', `**[Criterion ${index + 1}/${decisionData.criteria.length}]** ${crit.question}`);
         } else {
-            addMessage('bot', "Criteria weighted. Now, let's weigh the **Options** based on your initial intuition or preference.");
-            askNextOption(0);
+            setCurrentStep('matrix');
+            addMessage('bot', "Criteria weighted. Now, please fill in the **Performance Scores** (1-10) for each option against each criterion in the table below.");
         }
     };
 
@@ -126,33 +124,6 @@ Now, let's determine the relative importance of each factor to create your perso
         }, 500);
     };
 
-    const askNextOption = (index) => {
-        if (index < decisionData.options.length) {
-            setCurrentStep('weighting_options');
-            setOptionIndex(index);
-            const opt = decisionData.options[index];
-            addMessage('bot', `**[Option ${index + 1}/${decisionData.options.length}]** How much do you initially trust or prefer **${opt.name}**?`);
-        } else {
-            setCurrentStep('matrix');
-            addMessage('bot', "Now, please fill in the **Performance Scores** (1-10) for each option against each criterion in the table below.");
-        }
-    };
-
-    const handleOptionWeight = (value) => {
-        const currentOpt = decisionData.options[optionIndex];
-        addMessage('user', `Preference: ${value}/10`);
-        const newWeights = { ...optionWeights, [currentOpt.id]: value };
-        setOptionWeights(newWeights);
-
-        setTimeout(() => {
-            if (optionIndex + 1 < decisionData.options.length) {
-                askNextOption(optionIndex + 1);
-            } else {
-                setCurrentStep('matrix');
-                addMessage('bot', "Now, please fill in the **Performance Scores** (1-10) for each option against each criterion in the table below.");
-            }
-        }, 500);
-    };
 
     const handleManualScoreChange = (critId, optId, value) => {
         const score = Math.max(1, Math.min(10, parseInt(value) || 0));
@@ -175,7 +146,7 @@ Now, let's determine the relative importance of each factor to create your perso
                 weights: manualScores[crit.id]
             }));
 
-            const evaluated = evaluateOptions(decisionData.options, updatedCriteria, userWeights, optionWeights);
+            const evaluated = evaluateOptions(decisionData.options, updatedCriteria, userWeights);
             setResults(evaluated);
             setIsProcessing(false);
             addMessage('bot', "Analysis complete. Here are the ranked recommendations based strictly on your provided weights and performance scores.");
@@ -219,15 +190,6 @@ Now, let's determine the relative importance of each factor to create your perso
             );
         }
 
-        if (currentStep === 'weighting_options') {
-            return (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', justifyContent: 'center' }}>
-                    {[2, 4, 6, 8, 10].map(val => (
-                        <button key={val} onClick={() => handleOptionWeight(val)} className="btn-primary" style={{ padding: '0.5rem 1.5rem' }}>{val}</button>
-                    ))}
-                </div>
-            );
-        }
 
         if (currentStep === 'matrix') {
             return (
@@ -240,7 +202,6 @@ Now, let's determine the relative importance of each factor to create your perso
                                     {decisionData.options.map(opt => (
                                         <th key={opt.id} style={{ padding: '0.8rem', textAlign: 'center' }}>
                                             {opt.name}
-                                            <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 'normal' }}>Wt: {optionWeights[opt.id]}</div>
                                         </th>
                                     ))}
                                 </tr>
