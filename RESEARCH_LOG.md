@@ -1,6 +1,6 @@
 # RESEARCH_LOG.md
 
-## 1. Purpose of This Log
+## 1. Purpose & Scope
 
 This document records the research done while developing the decision-making system. It includes:
 
@@ -173,7 +173,17 @@ The system should **help users structure decisions mathematically and transparen
 ### What I Rejected
 
 - Full AI-driven criteria and option discovery for core logic  
-- Any external multipliers (e.g., “Trust” factor)  
+- Any external multipliers (e.g., “Trust” factor)
+
+### References & Influences
+
+The following concepts influenced the system design:
+
+- Weighted Sum Model (WSM) – a classical MCDA technique.
+- Multi-Criteria Decision Analysis (MCDA) frameworks.
+- Explainable Decision Support Systems principles.
+
+Most concepts were validated through general research and AI-assisted exploration rather than formal academic sourcing.
 
 ---
 
