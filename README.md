@@ -75,6 +75,11 @@ To better understand the system's structure and data flow, please refer to the f
 ![Data Flow Diagram](<./Design Diagrams/dfd2.drawio.png>)
 *Tracing the journey of user input into weighted results.*
 
+
+
+
+
+
 ---
 
 ### Architectural Rationale (The "Why")
