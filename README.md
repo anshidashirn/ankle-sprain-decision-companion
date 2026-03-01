@@ -65,7 +65,7 @@ To better understand the system's structure and data flow, please refer to the f
 
 ---
 
-## Architectural Rationale (The "Why")
+## Architectural Rationale 
 
 ### 1. Model Choice: Weighted Sum Model (WSM)
 
@@ -125,11 +125,28 @@ $$
 - Prevents scale distortion and dominance bias  
 
 ---
-### 3. Limitations
+
+### 3. Deterministic Core Design
+
+The engine is intentionally deterministic and based on pure functions.
+
+This ensures:
+- Predictable outputs
+- Easy reproducibility
+- Straightforward debugging
+- Simple unit testing
+
+Determinism was prioritized over probabilistic modeling to maintain clarity and explainability.
+
+---
+
+## Limitations & Trade-Offs
 
 - Assumes linear value growth (no diminishing returns).
 - Assumes criteria independence.
 - Deterministic outputs only (no uncertainty modeling).
+- Compensatory model: a high score in one criterion can offset a low score in another.
+- Does not model qualitative or fuzzy criteria directly.
 
 These trade-offs prioritize transparency and simplicity.
 
