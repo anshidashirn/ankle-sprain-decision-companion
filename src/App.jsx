@@ -13,10 +13,10 @@ function App() {
     }}>
       <header style={{ marginBottom: '4rem', textAlign: 'center' }}>
         <h1 className="title-gradient" style={{ fontSize: '3.5rem', marginBottom: '0.5rem' }}>
-          Decision Companion AI
+          Decision Companion System
         </h1>
         <p style={{ color: 'var(--text-dim)', fontSize: '1.2rem' }}>
-          AI-Driven Situational Analysis & Case Modeling
+          Situational Analysis & Case Modeling
         </p>
       </header>
 
