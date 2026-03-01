@@ -113,8 +113,7 @@ it was disciplined decision structuring.
 
 In Plan 2, I had assumed that users might not clearly know their criteria or available options. That assumption led me to design a discovery-heavy system.
 
-That realization led me to refine the architecture.
-I am comfortable revising architectural decisions when clearer requirements or insights emerge.
+This insight led me to revise the architecture toward a more disciplined, requirement-aligned design.
 
 ---
 
