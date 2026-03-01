@@ -13,39 +13,25 @@ The goal of this system is to provide a **transparent, structured, and mathemati
 
 ## Assumptions
 
-- **Users can score consistently**  
-  We assume users can rate each option on a simple fixed scale (2, 4, 6, 8, 10) in a way that reflects how they truly feel.
-- **Criteria don’t overlap**  
-  We assume each criterion measures something different (for example, “Salary” and “Work-Life Balance” are treated as separate and not double-counting the same thing).
-- **Scores increase evenly**  
-  We assume the difference between 6 and 8 is the same “improvement” as between 8 and 10. In other words, higher numbers always mean proportionally better outcomes.
-- **Users are willing to prioritize**  
-  We assume users are comfortable saying that one factor matters more than another.
-- **All options are known**  
-  We assume the user already knows the full set of options they want to compare. The system does not discover new options automatically.
+- Users can score options consistently on a fixed scale (2–10).
+- Each criterion measures a different factor (no overlap).
+- Higher scores always mean proportionally better outcomes.
+- Users can assign relative importance between criteria.
+- All options are defined before evaluation.
 ---
-
 ## Structured Workflow
 
-The system follows a clear and repeatable decision process:
+The system follows a simple decision process:
 
-1. **Define the Goal**  
-   Clearly state what decision you are trying to make.
-2. **Set Up the Structure**  
-   - **Options**: List the choices you want to compare.  
-   - **Criteria**: List the factors that matter for this decision.
-3. **Initialize the Model**  
-   The system prepares the calculation framework based on the options and criteria provided.
-4. **Assign Importance**  
-   - **Criteria Weights**: Indicate how important each factor is.  
-5. **Fill the Decision Matrix**  
-   Score how well each option performs against each criterion.
-6. **Calculate and Rank**  
-   The system normalizes all inputs, calculates weighted scores, ranks the options, and provides sensitivity insights.
-
+1. **Define the Goal** – State the decision clearly.
+2. **List Options & Criteria** – Identify choices and evaluation factors.
+3. **Assign Weights** – Set the importance of each criterion.
+4. **Score Options** – Rate each option against each criterion.
+5. **Calculate Results** – Normalize inputs, compute weighted scores, and rank options.
 ---
 
-### Data Model
+## Data Model
+
 The system operates on three core entities:
 
 *   **Option**: `{ id: string, name: string, description: string }`
@@ -56,23 +42,25 @@ The system operates on three core entities:
 The calculation runs in **O(n × m)** time, where:
 - `n` = number of options  
 - `m` = number of criteria  
-
 ---
 
-### Visual Architecture & Design
+## Visual Architecture & Design
 
 To better understand the system's structure and data flow, please refer to the following design diagrams:
 
 #### 1. System Architecture
 ![System Architecture](<./Design Diagrams/AFF.drawio.png>)
+
 *High-level overview of the local-only, deterministic architecture.*
 
 #### 2. Component Diagram
 ![Component Diagram](<./Design Diagrams/CDIA.drawio.png>)
+
 *Visualizing the relationship between React components and the Logic Engine.*
 
 #### 3. Data Flow Diagram (DFD)
 ![Data Flow Diagram](<./Design Diagrams/dfd2.drawio.png>)
+
 *Tracing the journey of user input into weighted results.*
 
 
@@ -82,231 +70,229 @@ To better understand the system's structure and data flow, please refer to the f
 
 ---
 
-### Architectural Rationale (The "Why")
+## Architectural Rationale 
 
-#### 1. Why Weighted Sum Model (WSM)?
+### 1. Model Choice: Weighted Sum Model (WSM)
 
-- **Weighted Sum Model (Chosen)**  
-  I chose WSM because it is transparent, easy to explain, and aligns closely with how people naturally reason:  
-  > “This factor matters this much, and this option performs this well.”
+The system uses the **Weighted Sum Model (WSM)** because it is:
 
-  While it makes simplifying assumptions (such as linear utility), it provides a strong balance between mathematical structure and practical usability.
+- Transparent
+- Easy to explain
+- Scalable
+- Practical for real-world decisions
 
-The decision to use WSM was not about choosing the most advanced model, but the most appropriate one for clarity, scalability, and explainability.
+It aligns with natural reasoning:
 
-#### 2. Normalization (Keeping the Math Fair)
+> “This factor matters this much, and this option performs this well.”
 
-To ensure results are balanced and not distorted by large numbers, the system normalizes all inputs before calculating the final score.
+The goal was clarity and explainability, not mathematical complexity.
 
 ---
 
-1. **Weight Normalization**
 
-User-defined importance values are converted into proportions so that all weights sum to 1.
+### 2. Normalization Strategy
+
+All inputs are normalized before final calculation to ensure fairness and consistency.
+
+#### Weight Normalization
 
 $$
-\text{NormalizedWeight}_i = \frac{w_i}{\sum_{j=1}^{n} w_j}
+NormalizedWeight_i = \frac{w_i}{\sum w}
 $$
 
-Where:
-- \( w_i \) = raw weight assigned to criterion \( i \)
-- \( n \) = total number of criteria
+- Ensures all weights sum to 1  
+- Preserves relative importance  
+
+$$
+\sum NormalizedWeight_i = 1
+$$
+
+---
+
+#### Score Scaling
+
+$$
+NormalizedScore_{ij} = \frac{r_{ij}}{10}
+$$
+
+- Scales scores to a 0–1 range  
+- Keeps all criteria comparable  
+
+---
+
+#### Final Score
+
+$$
+FinalScore_i = \sum (NormalizedWeight_j \times NormalizedScore_{ij})
+$$
+
+- Produces a value between 0 and 1  
+- Prevents scale distortion and dominance bias  
+
+---
+
+### 3. Deterministic Core Design
+
+The engine is intentionally deterministic and based on pure functions.
 
 This ensures:
+- Predictable outputs
+- Easy reproducibility
+- Straightforward debugging
+- Simple unit testing
 
-\[
-\sum NormalizedWeight = 1
-\]
-
-So decisions are based on **relative importance**, not raw numbers.
+Determinism was prioritized over probabilistic modeling to maintain clarity and explainability.
 
 ---
 
-2 **Score Scaling**
+## Limitations & Trade-Offs
 
-Performance scores are scaled to a 0–1 range to keep everything on the same scale:
+- Assumes linear value growth (no diminishing returns).
+- Assumes criteria independence.
+- Deterministic outputs only (no uncertainty modeling).
+- Compensatory model: a high score in one criterion can offset a low score in another.
+- Does not model qualitative or fuzzy criteria directly.
+
+These trade-offs prioritize transparency and simplicity.
+
+---
+
+## Example
+
+### Decision Goal
+Choose between two job offers.
+
+---
+
+### Step 1: Criteria & Weights
+
+| Criterion         | Weight |
+|------------------|--------|
+| Salary           | 10     |
+| Work-Life Balance| 5      |
+
+Total Weight = 15
+
+---
+
+### Step 2: Normalize Weights
 
 $$
-\text{NormalizedScore}_{ij} = \frac{r_{ij}}{10}
-$$
-
-Where:
-- \( r_{ij} \) = raw score of option \( i \) on criterion \( j \)
-
-This guarantees consistent comparison across all criteria.
-
----
-
-3 **Final Calculation**
-
-The final score for each option is calculated as:
-
-$$
-\text{FinalScore}_i = \sum_{j=1}^{m}
-\left(
-\text{NormalizedWeight}_j \times \text{NormalizedScore}_{ij}
-\right)
-$$
-
-Where:
-- \( m \) = total number of criteria
-
-The result is a value between **0 and 1**, representing how well the option aligns with the user's priorities.
-
----
-
-This normalization process prevents:
-
-- Score inflation  
-- One criterion dominating unfairly  
-- Scale inconsistencies  
-
-#### 3. Handling Human Ambiguity & Bias
-
-Even structured decision systems are influenced by human judgment. The system includes basic safeguards to make users more aware of their own biases.
-
-- **Sensitivity Analysis**  
-  The system calculates how much a criterion’s weight would need to change to alter the top-ranked option.  
-  This helps answer the question:  
-  *“How stable is this result?”*  
-
-  If a small weight change flips the ranking, the decision may not be robust.
-
-- **Discrete Scoring Scale**  
-  The system uses an even-numbered scale (2, 4, 6, 8, 10) instead of including a neutral middle value.  
-  This reduces the tendency to default to a “safe” average score and encourages clearer judgments.
-
-#### 4. Limitations & Intellectual Honesty
-
-No decision model is perfect. This system makes simplifying assumptions to stay transparent and easy to use.
-- **Linear Assumption**  
-  The model assumes that higher scores always increase value at a constant rate. In reality, some factors (like salary) may have diminishing returns after a certain point.
-- **Criteria Independence**  
-  The system assumes each criterion measures something different. If criteria overlap, the model may unintentionally double-count similar factors.
-- **Deterministic Model**  
-  The system works with fixed inputs and produces fixed outputs. It does not account for uncertainty, risk, or probability in real-world outcomes.
----
-
-### Complete Example
-
-**Decision Goal**
-Choosing between three job offers.
-
----
-
-#### Step 1: Define Options
-
-- **Option A** — Startup Company  
-- **Option B** — Mid-size Company  
-- **Option C** — Large Enterprise  
-
----
-
-#### Step 2: Define Criteria & Weights
-
-| Criterion            | Weight (2–10) |
-|----------------------|---------------|
-| Salary               | 10            |
-| Work-Life Balance    | 6             |
-| Growth Potential     | 8             |
-
-Total Weight = 24
-
----
-
-#### Step 3: Normalize Weights
-
-\[
 NormalizedWeight_i = \frac{w_i}{\sum w}
-\]
+$$
 
-| Criterion            | Raw Weight | Normalized |
-|----------------------|------------|------------|
-| Salary               | 10         | 0.42       |
-| Work-Life Balance    | 6          | 0.25       |
-| Growth Potential     | 8          | 0.33       |
-
-(Sum = 1.0)
+- Salary = 10 / 15 = 0.67  
+- Work-Life = 5 / 15 = 0.33  
 
 ---
 
-#### Step 4: Score Each Option (2–10 Scale)
+### Step 3: Score Options (2–10 Scale)
 
-| Option   | Salary | Work-Life | Growth |
-|----------|--------|----------|--------|
-| A        | 8      | 4        | 10     |
-| B        | 7      | 8        | 7      |
-| C        | 9      | 6        | 6      |
-
----
-
-#### Step 5: Normalize Scores (Divide by 10)
-
-| Option   | Salary | Work-Life | Growth |
-|----------|--------|----------|--------|
-| A        | 0.8    | 0.4      | 1.0    |
-| B        | 0.7    | 0.8      | 0.7    |
-| C        | 0.9    | 0.6      | 0.6    |
+| Option | Salary | Work-Life |
+|--------|--------|----------|
+| A      | 8      | 4        |
+| B      | 7      | 8        |
 
 ---
 
-#### Step 6: Final Score Calculation
+### Step 4: Normalize Scores
 
-\[
+$$
+NormalizedScore = \frac{RawScore}{10}
+$$
+
+| Option | Salary | Work-Life |
+|--------|--------|----------|
+| A      | 0.8    | 0.4      |
+| B      | 0.7    | 0.8      |
+
+---
+
+### Step 5: Final Calculation
+
+$$
 FinalScore = \sum (NormalizedWeight \times NormalizedScore)
-\]
+$$
 
-##### Option A
-
-\[
-(0.42 × 0.8) + (0.25 × 0.4) + (0.33 × 1.0) = 0.77
-\]
-
-##### Option B
-
-\[
-(0.42 × 0.7) + (0.25 × 0.8) + (0.33 × 0.7) = 0.73
-\]
-
-##### Option C
-
-\[
-(0.42 × 0.9) + (0.25 × 0.6) + (0.33 × 0.6) = 0.73
-\]
+- Option A = 0.67×0.8 + 0.33×0.4 = **0.67**
+- Option B = 0.67×0.7 + 0.33×0.8 = **0.73**
 
 ---
 
-#### Final Ranking
+### Final Ranking
 
-1. **Option A** — 0.77  
-2. **Option B** — 0.73  
-3. **Option C** — 0.73  
-
----
-
-#### Interpretation
-
-- **Option A** ranks first because it performs extremely well on **Growth Potential**, which has high importance.
-- **Option B** performs strongly on **Work-Life Balance**, but that criterion has lower overall weight.
-- **Option C** benefits from high Salary, but weaker performance in Growth reduces its total.
+1. **Option B**
+2. **Option A**
 
 ---
+## Testing Strategy
 
-#### Sensitivity Insight
+The decision engine is easy to test because it is:
 
-If the weight of **Growth Potential** were reduced slightly (for example from 8 to 6), Option B would likely become the top recommendation.
+- Deterministic (same input → same output)
+- Built with pure functions
+- Independent from the UI layer
 
-This indicates the decision is somewhat sensitive to how much long-term growth is valued.
----
+This allows straightforward unit testing.
+
+### Key Test Areas
+
+- Weight normalization (sum must equal 1)
+- Score normalization (correct scaling to 0–1)
+- Final score calculation
+- Ranking logic
+- Tie handling
+- Sensitivity calculation
+- Edge cases (zero weights, empty inputs, single criterion)
 
 ### Edge Cases Considered
-*   **Equal Weighting**: If all criteria are given the same weight, the system automatically distributes importance evenly and avoids division errors.
-*   **Tied Results**: If two options receive the same final score, the system compares their fractional contributions to show relative alignment.
-*   **Extreme Weighting**: Normalization ensures that even large differences in weights (e.g., 10 vs 2) do not break the bounded [0,1] score range or distort calculations.
+
+- Zero total weight (prevents division errors)
+- Single option or single criterion
+- Equal final scores (tie handling)
+- Extreme weight differences
+- Empty or missing inputs
+
+### Example Test Scenario
+
+**Input:**
+- 2 options
+- 1 criterion
+- Equal weights
+
+**Expected:**
+- Higher score ranks first
+- Normalized weights sum to 1
 
 ---
 
-### Getting Started
+## Future Improvements
+
+### Testing & Quality
+- Full unit test coverage
+- Edge-case stress testing
+- Continuous Integration (CI)
+- Code coverage tracking
+
+### Decision Model
+- Support cost-type criteria (lower is better)
+- Add alternative methods (AHP, TOPSIS)
+- Basic uncertainty modeling
+
+### User Experience
+- Save decisions (localStorage or backend)
+- Export results (CSV/PDF)
+- Add simple visualizations
+- Compare multiple scenarios
+
+### Architecture
+- Publish engine as an npm package
+- Add TypeScript
+- Optimize for larger datasets
+
+---
+
+### How to Run the Project
 1. `npm install`
 2. `npm run dev`
 3. Access: `http://localhost:5173`
